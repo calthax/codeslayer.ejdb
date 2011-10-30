@@ -1,0 +1,1 @@
+java -cp .:$EJDB_HOME/lib/tools.jar -jar $EJDB_HOME/dist/ejdb.jar
