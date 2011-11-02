@@ -38,6 +38,9 @@ public class BreakpointManager {
     public void addBreakpoint(String className, int lineNumber)
             throws Exception {
 
+        System.out.println("add breakpoint");
+        System.out.flush();
+
         List<ReferenceType> referenceTypes = virtualMachine.classesByName(className);
         if (referenceTypes == null || referenceTypes.isEmpty()) {
             System.out.println("not a valid breakpoint reference type");
