@@ -19,4 +19,6 @@ package org.ejdb;
 
 public interface CommandHandler {
 
+    public Command retrieveCommand();
+    public void sendCommand(Command command);
 }

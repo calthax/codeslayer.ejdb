@@ -26,9 +26,6 @@ public class Main {
 
     public static void main(String args[]) {
 
-        System.out.println("entered main\n");
-        System.out.flush();
-
         VirtualMachine virtualMachine = null;
         try {
             VMConnector connector = new VMConnector();
@@ -37,9 +34,6 @@ public class Main {
             System.err.println("Not able to connect to the VM.");
             System.exit(1);
         }
-
-        System.out.println("connected to machine\n");
-        System.out.flush();
 
         EventRequestManager eventRequestManager = virtualMachine.eventRequestManager();
         EventQueue eventQueue = virtualMachine.eventQueue();
@@ -58,5 +52,9 @@ public class Main {
         do {
             // keep running while threads are still alive
         } while (commandHandlerThread.isAlive() && eventHandlerThread.isAlive());
+
+        System.out.println("shutting down");
+
+        virtualMachine.dispose();
     }
 }

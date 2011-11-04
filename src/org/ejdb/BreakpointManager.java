@@ -38,19 +38,16 @@ public class BreakpointManager {
     public void addBreakpoint(String className, int lineNumber)
             throws Exception {
 
-        System.out.println("add breakpoint");
-        System.out.flush();
-
         List<ReferenceType> referenceTypes = virtualMachine.classesByName(className);
         if (referenceTypes == null || referenceTypes.isEmpty()) {
-            System.out.println("not a valid breakpoint reference type");
+            System.err.println("not a valid breakpoint reference type");
             return;
         }
 
         ReferenceType referenceType = referenceTypes.get(0);
         List<Location> locations = referenceType.locationsOfLine(lineNumber);
         if (locations == null || locations.isEmpty()) {
-            System.out.println("not a valid breakpoint location");
+            System.err.println("not a valid breakpoint location");
             return;
         }
 

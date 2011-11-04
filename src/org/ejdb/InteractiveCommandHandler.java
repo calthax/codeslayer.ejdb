@@ -18,27 +18,22 @@
 package org.ejdb;
 
 import java.io.InputStreamReader;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
 
-public class InteractiveCommandHandler implements CommandHandler, Runnable {
-
-    private Queue<Command> commands = new LinkedBlockingQueue<Command>();
-
-    private final BreakpointManager breakpointManager;
+public class InteractiveCommandHandler extends AbstractCommandHandler {
 
     public InteractiveCommandHandler(BreakpointManager breakpointManager) {
         
-        this.breakpointManager = breakpointManager;
+        super(breakpointManager);
+    }
+
+    public void sendCommand(Command command) {
+
     }
 
     public void run() {
 
         while (true) {
             try {
-                System.out.println("try to read\n");
-                System.out.flush();
-
                 StringBuilder sb = new StringBuilder();
                 InputStreamReader reader = new InputStreamReader(System.in);
 
@@ -48,7 +43,6 @@ public class InteractiveCommandHandler implements CommandHandler, Runnable {
                     while (reader.ready()) {
                         sb.append((char) data);
                         data = reader.read();
-                        System.out.println("data " + sb.toString());
                     }
 
                     String command = sb.toString();

@@ -18,33 +18,29 @@
 package org.ejdb;
 
 import java.io.Console;
-import java.util.Queue;
-import java.util.concurrent.LinkedBlockingQueue;
 
-public class ConsoleCommandHandler implements CommandHandler, Runnable {
+public class ConsoleCommandHandler extends AbstractCommandHandler {
 
-    private Queue<Command> commands = new LinkedBlockingQueue<Command>();
-
-    private final BreakpointManager breakpointManager;
+    private final Console console;
 
     public ConsoleCommandHandler(BreakpointManager breakpointManager) {
         
-        this.breakpointManager = breakpointManager;
-    }
-
-    public void run() {
-
-        Console console = System.console();
+        super(breakpointManager);
+        this.console = System.console();
         if (console == null) {
             System.err.println("no console.");
             System.exit(1);
         }
+    }
+
+    public void sendCommand(Command command) {
+
+    }
+
+    public void run() {
 
         while (true) {
             try {
-                System.out.println("try to read\n");
-                System.out.flush();
-
                 String command = console.readLine("(cmd)");
 
                 if (command != null && !command.isEmpty()) {
@@ -61,14 +57,14 @@ public class ConsoleCommandHandler implements CommandHandler, Runnable {
                     }
                 }
             } catch (Exception ex) {
-                System.err.println("The interactive command handler is unable to carry out the command.\n");
+                System.err.println("The console command handler is unable to carry out the command.\n");
                 System.exit(1);
             }
 
             try {
                 Thread.sleep(100);
             } catch (InterruptedException ex) {
-                System.err.println("The interactive command handler quit unexpectedly.");
+                System.err.println("The console command handler quit unexpectedly.");
             }
         }
     }

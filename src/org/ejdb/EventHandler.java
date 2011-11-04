@@ -38,25 +38,18 @@ public class EventHandler implements Runnable {
 
     public void run() {
 
-        System.out.println("start running\n");
-        System.out.flush();
-
         while (true) {
             try {
-                System.out.println("try to read\n");
-                System.out.flush();
-
                 EventSet eventSet = eventQueue.remove();
                 for (Event event : eventSet) {
                     if (event instanceof VMDeathEvent || event instanceof VMDisconnectEvent) {
                         System.exit(1);
                     } else if (event instanceof BreakpointEvent) {
-                        System.out.println ("hitting the breakpoint\n");
-                        System.out.flush();
                         BreakpointEvent breakpointEvent = (BreakpointEvent)event;
+                        Location location = breakpointEvent.location();
+                        
 
-                        Location bpr1 = breakpointEvent.location();
-                        int ln1 = bpr1.lineNumber();
+                        int ln1 = location.lineNumber();
                         System.out.println ("bpr1 " + ln1 + " \n");
                         System.out.flush();
                     }
@@ -70,7 +63,7 @@ public class EventHandler implements Runnable {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException ex) {
-                System.out.println("The thread was interrupted.");
+                System.out.println("The event handler quit unexpectedly.");
             }
         }
     }
