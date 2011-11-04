@@ -35,12 +35,9 @@ public class Main {
             System.exit(1);
         }
 
-        EventRequestManager eventRequestManager = virtualMachine.eventRequestManager();
         EventQueue eventQueue = virtualMachine.eventQueue();
 
-        BreakpointManager breakpointManager = new BreakpointManager(virtualMachine, eventRequestManager);
-        
-        InteractiveCommandHandler commandHandler = new InteractiveCommandHandler(breakpointManager);
+        CommandHandler commandHandler = createCommandHandler(virtualMachine, args);
         Thread commandHandlerThread = new Thread(commandHandler);
 
         EventHandler eventHandler = new EventHandler(commandHandler, eventQueue);
@@ -56,5 +53,21 @@ public class Main {
         System.out.println("shutting down");
 
         virtualMachine.dispose();
+    }
+
+    private static CommandHandler createCommandHandler(VirtualMachine virtualMachine, String args[]) {
+
+        EventRequestManager eventRequestManager = virtualMachine.eventRequestManager();
+        BreakpointManager breakpointManager = new BreakpointManager(virtualMachine, eventRequestManager);
+
+        if (args != null && args.length > 0) {
+            String type = args[0];
+            System.out.println("type is " + type);
+            if (type.equals("--interpreter=mi")) {
+                return new InteractiveCommandHandler(breakpointManager);
+            }
+        }
+
+        return new ConsoleCommandHandler(breakpointManager);
     }
 }

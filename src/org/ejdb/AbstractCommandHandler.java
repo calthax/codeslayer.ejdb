@@ -17,8 +17,22 @@
  */
 package org.ejdb;
 
-public interface CommandHandler extends Runnable {
+import java.util.Queue;
+import java.util.concurrent.LinkedBlockingQueue;
 
-    public Command retrieveCommand();
-    public void sendCommand(Command command);
+public abstract class AbstractCommandHandler implements CommandHandler {
+
+    Queue<Command> commands = new LinkedBlockingQueue<Command>();
+
+    final BreakpointManager breakpointManager;
+
+    public AbstractCommandHandler(BreakpointManager breakpointManager) {
+
+        this.breakpointManager = breakpointManager;
+    }
+
+    public Command retrieveCommand() {
+
+        return commands.poll();
+    }
 }
