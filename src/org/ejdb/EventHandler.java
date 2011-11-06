@@ -18,52 +18,97 @@
 package org.ejdb;
 
 import com.sun.jdi.Location;
+import com.sun.jdi.ThreadReference;
+import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.event.BreakpointEvent;
 import com.sun.jdi.event.Event;
 import com.sun.jdi.event.EventQueue;
 import com.sun.jdi.event.EventSet;
+import com.sun.jdi.event.StepEvent;
 import com.sun.jdi.event.VMDeathEvent;
 import com.sun.jdi.event.VMDisconnectEvent;
+import com.sun.jdi.request.EventRequestManager;
+import com.sun.jdi.request.StepRequest;
 
 public class EventHandler implements Runnable {
 
+    private final VirtualMachine virtualMachine;
     private final CommandHandler commandHandler;
-    private final EventQueue eventQueue;
+    private final SourceHandler sourceHandler;
+    private final EventRequestManager eventRequestManager;
 
-    public EventHandler(CommandHandler commandHandler, EventQueue eventQueue) {
+    public EventHandler(VirtualMachine virtualMachine, CommandHandler commandHandler, SourceHandler sourceHandler) {
 
+        this.virtualMachine = virtualMachine;
         this.commandHandler = commandHandler;
-        this.eventQueue = eventQueue;
+        this.sourceHandler = sourceHandler;
+        this.eventRequestManager = virtualMachine.eventRequestManager();
     }
 
     public void run() {
+
+        EventQueue eventQueue = virtualMachine.eventQueue();
 
         while (true) {
             try {
                 EventSet eventSet = eventQueue.remove();
                 for (Event event : eventSet) {
                     if (event instanceof VMDeathEvent || event instanceof VMDisconnectEvent) {
-                        System.exit(1);
+                        return;
                     } else if (event instanceof BreakpointEvent) {
                         BreakpointEvent breakpointEvent = (BreakpointEvent)event;
                         Location location = breakpointEvent.location();
-                        
 
-                        int ln1 = location.lineNumber();
-                        System.out.println ("bpr1 " + ln1 + " \n");
-                        System.out.flush();
+                        OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.BREAKPOINT, location.sourcePath(), location.lineNumber());
+                        commandHandler.sendCommand(outputCommand);
+                        
+                        InputCommand inputCommand = commandHandler.retrieveCommand();
+                        switch (inputCommand.getType()) {
+                            case NEXT:
+                                ThreadReference thread = breakpointEvent.thread();
+                                StepRequest stepRequest = eventRequestManager.createStepRequest(thread, StepRequest.STEP_LINE, StepRequest.STEP_OVER);
+                                stepRequest.addCountFilter(1);
+                                stepRequest.enable();
+                                virtualMachine.resume();
+                                break;
+                        }
+                    } else if (event instanceof StepEvent) {
+                        StepEvent stepEvent = (StepEvent)event;
+                        Location location = stepEvent.location();
+
+                        OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.STEP_OVER, location.sourcePath(), location.lineNumber());
+                        String text = sourceHandler.getLine(location.sourcePath(),location.lineNumber());
+                        outputCommand.setText(text);
+
+                        commandHandler.sendCommand(outputCommand);
+
+                        stepEvent.request().disable();
+
+                        InputCommand inputCommand = commandHandler.retrieveCommand();
+                        switch (inputCommand.getType()) {
+                            case NEXT:
+                                ThreadReference thread = stepEvent.thread();
+                                StepRequest stepRequest = eventRequestManager.createStepRequest(thread, StepRequest.STEP_LINE, StepRequest.STEP_OVER);
+//                                stepRequest.addCountFilter(1);
+                                stepRequest.enable();
+                                virtualMachine.resume();
+                                break;
+                        }
                     }
                 }
                 eventSet.resume();
             } catch (Exception ex) {
                 System.out.printf("Not able to carry out the command.\n");
-                System.exit(1);
+                ex.printStackTrace();
+                break;
             }
 
             try {
                 Thread.sleep(100);
             } catch (InterruptedException ex) {
                 System.out.println("The event handler quit unexpectedly.");
+                ex.printStackTrace();
+                break;
             }
         }
     }

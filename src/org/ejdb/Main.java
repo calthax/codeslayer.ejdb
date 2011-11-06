@@ -18,8 +18,6 @@
 package org.ejdb;
 
 import com.sun.jdi.VirtualMachine;
-import com.sun.jdi.event.EventQueue;
-import com.sun.jdi.request.EventRequestManager;
 import java.io.IOException;
 
 public class Main {
@@ -35,12 +33,12 @@ public class Main {
             System.exit(1);
         }
 
-        EventQueue eventQueue = virtualMachine.eventQueue();
-
         CommandHandler commandHandler = createCommandHandler(virtualMachine, args);
         Thread commandHandlerThread = new Thread(commandHandler);
 
-        EventHandler eventHandler = new EventHandler(commandHandler, eventQueue);
+        SourceHandler sourceHandler = new SourceHandler(new String[]{"/home/jeff/workspace/jmesaWeb/src/"});
+
+        EventHandler eventHandler = new EventHandler(virtualMachine, commandHandler, sourceHandler);
         Thread eventHandlerThread = new Thread(eventHandler);
 
         commandHandlerThread.start();
@@ -57,8 +55,7 @@ public class Main {
 
     private static CommandHandler createCommandHandler(VirtualMachine virtualMachine, String args[]) {
 
-        EventRequestManager eventRequestManager = virtualMachine.eventRequestManager();
-        BreakpointManager breakpointManager = new BreakpointManager(virtualMachine, eventRequestManager);
+        BreakpointManager breakpointManager = new BreakpointManager(virtualMachine);
 
         if (args != null && args.length > 0) {
             String type = args[0];

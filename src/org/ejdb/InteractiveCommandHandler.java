@@ -26,7 +26,7 @@ public class InteractiveCommandHandler extends AbstractCommandHandler {
         super(breakpointManager);
     }
 
-    public void sendCommand(Command command) {
+    public void sendCommand(OutputCommand command) {
 
     }
 
@@ -45,20 +45,16 @@ public class InteractiveCommandHandler extends AbstractCommandHandler {
                         data = reader.read();
                     }
 
-                    String command = sb.toString();
+                    String cmd = sb.toString();
 
-                    if (command != null && !command.isEmpty()) {
-                        if (command.equals("quit")) {
+                    InputCommand command = commandFactory.create(cmd);
+
+                    switch (command.getType()) {
+                        case QUIT:
                             return;
-                        }
-
-                        if (command.startsWith("break ")) { // break org.jmesaweb.controller.BasicPresidentController:68
-                            String substring = command.substring("break ".length(), command.length());
-                            String[] split = substring.split(":");
-                            String className = split[0];
-                            String lineStr = split[1];
-                            breakpointManager.addBreakpoint(className, Integer.parseInt(lineStr));
-                        }
+                        case BREAK:
+                            breakpointManager.addBreakpoint(command);
+                            break;
                     }
                 }
             } catch (Exception ex) {

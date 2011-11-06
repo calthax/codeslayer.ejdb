@@ -17,54 +17,88 @@
  */
 package org.ejdb;
 
-import java.io.Console;
+import java.io.InputStreamReader;
 
 public class ConsoleCommandHandler extends AbstractCommandHandler {
-
-    private final Console console;
 
     public ConsoleCommandHandler(BreakpointManager breakpointManager) {
         
         super(breakpointManager);
-        this.console = System.console();
-        if (console == null) {
-            System.err.println("no console.");
-            System.exit(1);
-        }
     }
 
-    public void sendCommand(Command command) {
+    public void sendCommand(OutputCommand command) {
 
+        switch (command.getType()) {
+            case BREAKPOINT:
+                System.out.printf("Hit breakpoint at %s:%d\n", command.getClassName(), command.getLineNumber());
+                break;
+            case STEP_OVER:
+                System.out.printf("%d %s\n", command.getLineNumber(), command.getText());
+                break;
+        }
     }
 
     public void run() {
 
+        String lastCmd = null;
+
         while (true) {
             try {
-                String command = console.readLine("(cmd)");
+                StringBuilder sb = new StringBuilder();
+                InputStreamReader reader = new InputStreamReader(System.in);
 
-                if (command != null && !command.isEmpty()) {
-                    if (command.equals("quit")) {
-                        return;
+                if (reader.ready()) {
+                    int data = reader.read();
+
+                    while (reader.ready()) {
+                        sb.append((char) data);
+                        data = reader.read();
                     }
 
-                    if (command.startsWith("break ")) { // break org.jmesaweb.controller.BasicPresidentController:68
-                        String substring = command.substring("break ".length(), command.length());
-                        String[] split = substring.split(":");
-                        String className = split[0];
-                        String lineStr = split[1];
-                        breakpointManager.addBreakpoint(className, Integer.parseInt(lineStr));
+                    String cmd = sb.toString();
+
+                    if (cmd != null) {
+                        cmd = cmd.trim();
+                    }
+
+                    if (cmd == null || cmd.isEmpty()) {
+                        if (lastCmd != null) {
+                            cmd = lastCmd;
+                        } else {
+                            continue;
+                        }
+                    }
+
+                    lastCmd = cmd;
+
+                    InputCommand command = commandFactory.create(cmd);
+
+                    switch (command.getType()) {
+                        case QUIT:
+                            return;
+                        case BREAK:
+                            breakpointManager.addBreakpoint(command);
+                            break;
+                        case NEXT:
+                            commands.add(command);
+                            break;
+                        case CONTINUE:
+                            commands.add(command);
+                            break;
                     }
                 }
             } catch (Exception ex) {
                 System.err.println("The console command handler is unable to carry out the command.\n");
-                System.exit(1);
+                ex.printStackTrace();
+                return;
             }
 
             try {
                 Thread.sleep(100);
             } catch (InterruptedException ex) {
                 System.err.println("The console command handler quit unexpectedly.");
+                ex.printStackTrace();
+                return;
             }
         }
     }

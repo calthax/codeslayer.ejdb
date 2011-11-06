@@ -19,6 +19,6 @@ package org.ejdb;
 
 public interface CommandHandler extends Runnable {
 
-    public Command retrieveCommand();
-    public void sendCommand(Command command);
+    public InputCommand retrieveCommand();
+    public void sendCommand(OutputCommand command);
 }

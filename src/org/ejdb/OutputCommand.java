@@ -17,28 +17,40 @@
  */
 package org.ejdb;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+public class OutputCommand extends Command {
 
-public abstract class AbstractCommandHandler implements CommandHandler {
+    private final Type type;
+    private String text;
 
-    BlockingQueue<InputCommand> commands = new LinkedBlockingQueue<InputCommand>();
+    public OutputCommand(Type type) {
 
-    final BreakpointManager breakpointManager;
-    final InputCommandFactory commandFactory = new InputCommandFactory();
-
-    public AbstractCommandHandler(BreakpointManager breakpointManager) {
-
-        this.breakpointManager = breakpointManager;
+        this.type = type;
     }
 
-    public InputCommand retrieveCommand() {
-        try {
-            return commands.take();
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-        }
+    public OutputCommand(Type type, String className, Integer lineNumber) {
 
-        throw new IllegalStateException("Not able to retrieve the command.");
+        super(className, lineNumber);
+        this.type = type;
+    }
+
+    public Type getType() {
+
+        return type;
+    }
+
+    public String getText() {
+
+        return text;
+    }
+
+    public void setText(String text) {
+
+        this.text = text;
+    }
+
+    public enum Type {
+
+        STEP_OVER,
+        BREAKPOINT;
     }
 }

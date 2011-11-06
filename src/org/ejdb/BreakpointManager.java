@@ -29,23 +29,23 @@ public class BreakpointManager {
     private final VirtualMachine virtualMachine;
     private final EventRequestManager eventRequestManager;
 
-    public BreakpointManager(VirtualMachine virtualMachine, EventRequestManager eventRequestManager) {
+    public BreakpointManager(VirtualMachine virtualMachine) {
 
         this.virtualMachine = virtualMachine;
-        this.eventRequestManager = eventRequestManager;
+        this.eventRequestManager = virtualMachine.eventRequestManager();
     }
 
-    public void addBreakpoint(String className, int lineNumber)
+    public void addBreakpoint(Command command)
             throws Exception {
 
-        List<ReferenceType> referenceTypes = virtualMachine.classesByName(className);
+        List<ReferenceType> referenceTypes = virtualMachine.classesByName(command.getClassName());
         if (referenceTypes == null || referenceTypes.isEmpty()) {
             System.err.println("not a valid breakpoint reference type");
             return;
         }
 
         ReferenceType referenceType = referenceTypes.get(0);
-        List<Location> locations = referenceType.locationsOfLine(lineNumber);
+        List<Location> locations = referenceType.locationsOfLine(command.getLineNumber());
         if (locations == null || locations.isEmpty()) {
             System.err.println("not a valid breakpoint location");
             return;
@@ -54,5 +54,7 @@ public class BreakpointManager {
         Location location = locations.get(0);
         BreakpointRequest breakpointRequest = eventRequestManager.createBreakpointRequest(location);
         breakpointRequest.setEnabled(true);
+
+        System.out.printf("Breakpoint added at %s:%d\n", command.getClassName(), command.getLineNumber());
     }
 }

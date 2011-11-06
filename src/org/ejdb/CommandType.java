@@ -17,28 +17,20 @@
  */
 package org.ejdb;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+public enum CommandType {
 
-public abstract class AbstractCommandHandler implements CommandHandler {
+    BREAK("break"),
+    QUIT("q");
 
-    BlockingQueue<InputCommand> commands = new LinkedBlockingQueue<InputCommand>();
+    private final String shortName;
 
-    final BreakpointManager breakpointManager;
-    final InputCommandFactory commandFactory = new InputCommandFactory();
+    private CommandType(String shortName) {
 
-    public AbstractCommandHandler(BreakpointManager breakpointManager) {
-
-        this.breakpointManager = breakpointManager;
+        this.shortName = shortName;
     }
 
-    public InputCommand retrieveCommand() {
-        try {
-            return commands.take();
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-        }
+    public String getShortName() {
 
-        throw new IllegalStateException("Not able to retrieve the command.");
+        return shortName;
     }
 }

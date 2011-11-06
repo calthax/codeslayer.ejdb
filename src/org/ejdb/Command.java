@@ -19,26 +19,27 @@ package org.ejdb;
 
 public class Command {
 
-    private String className;
-    private String line;
+    private final String className;
+    private final Integer lineNumber;
+
+    public Command() {
+        
+        this(null, null);
+    }
+
+    public Command(String className, Integer lineNumber) {
+
+        this.className = className;
+        this.lineNumber = lineNumber;
+    }
 
     public String getClassName() {
 
         return className;
     }
 
-    public void setClassName(String className) {
+    public Integer getLineNumber() {
 
-        this.className = className;
-    }
-
-    public String getLine() {
-
-        return line;
-    }
-
-    public void setLine(String line) {
-
-        this.line = line;
+        return lineNumber;
     }
 }
