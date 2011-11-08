@@ -24,6 +24,7 @@ import com.sun.jdi.event.BreakpointEvent;
 import com.sun.jdi.event.Event;
 import com.sun.jdi.event.EventQueue;
 import com.sun.jdi.event.EventSet;
+import com.sun.jdi.event.LocatableEvent;
 import com.sun.jdi.event.StepEvent;
 import com.sun.jdi.event.VMDeathEvent;
 import com.sun.jdi.event.VMDisconnectEvent;
@@ -59,17 +60,16 @@ public class EventHandler implements Runnable {
                         BreakpointEvent breakpointEvent = (BreakpointEvent)event;
                         Location location = breakpointEvent.location();
 
-                        OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.BREAKPOINT, location.sourcePath(), location.lineNumber());
+                        OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.HIT_BREAKPOINT, location.sourcePath(), location.lineNumber());
                         commandHandler.sendCommand(outputCommand);
                         
                         InputCommand inputCommand = commandHandler.retrieveCommand();
                         switch (inputCommand.getType()) {
                             case NEXT:
-                                ThreadReference thread = breakpointEvent.thread();
-                                StepRequest stepRequest = eventRequestManager.createStepRequest(thread, StepRequest.STEP_LINE, StepRequest.STEP_OVER);
-                                stepRequest.addCountFilter(1);
-                                stepRequest.enable();
-                                virtualMachine.resume();
+                                next(breakpointEvent);
+                                break;
+                            case CONTINUE:
+                                cont();
                                 break;
                         }
                     } else if (event instanceof StepEvent) {
@@ -80,25 +80,24 @@ public class EventHandler implements Runnable {
                         String text = sourceHandler.getLine(location.sourcePath(),location.lineNumber());
                         outputCommand.setText(text);
 
-                        commandHandler.sendCommand(outputCommand);
+                        eventRequestManager.deleteEventRequest(stepEvent.request());
 
-                        stepEvent.request().disable();
+                        commandHandler.sendCommand(outputCommand);
 
                         InputCommand inputCommand = commandHandler.retrieveCommand();
                         switch (inputCommand.getType()) {
                             case NEXT:
-                                ThreadReference thread = stepEvent.thread();
-                                StepRequest stepRequest = eventRequestManager.createStepRequest(thread, StepRequest.STEP_LINE, StepRequest.STEP_OVER);
-//                                stepRequest.addCountFilter(1);
-                                stepRequest.enable();
-                                virtualMachine.resume();
+                                next(stepEvent);
+                                break;
+                            case CONTINUE:
+                                cont();
                                 break;
                         }
                     }
                 }
                 eventSet.resume();
             } catch (Exception ex) {
-                System.out.printf("Not able to carry out the command.\n");
+                System.err.println("Not able to carry out the command.");
                 ex.printStackTrace();
                 break;
             }
@@ -106,10 +105,23 @@ public class EventHandler implements Runnable {
             try {
                 Thread.sleep(100);
             } catch (InterruptedException ex) {
-                System.out.println("The event handler quit unexpectedly.");
+                System.err.println("The event handler quit unexpectedly.");
                 ex.printStackTrace();
                 break;
             }
         }
+    }
+
+    private void next(LocatableEvent locatableEvent) {
+
+        ThreadReference thread = locatableEvent.thread();
+        StepRequest stepRequest = eventRequestManager.createStepRequest(thread, StepRequest.STEP_LINE, StepRequest.STEP_OVER);
+        stepRequest.enable();
+        virtualMachine.resume();
+    }
+
+    private void cont() {
+
+        virtualMachine.resume();
     }
 }

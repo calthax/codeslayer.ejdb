@@ -50,7 +50,8 @@ public class OutputCommand extends Command {
 
     public enum Type {
 
-        STEP_OVER,
-        BREAKPOINT;
+        ADD_BREAKPOINT,
+        HIT_BREAKPOINT,
+        STEP_OVER;
     }
 }

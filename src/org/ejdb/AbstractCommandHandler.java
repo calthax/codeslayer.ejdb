@@ -17,28 +17,98 @@
  */
 package org.ejdb;
 
+import com.sun.jdi.VirtualMachine;
+import java.io.InputStreamReader;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public abstract class AbstractCommandHandler implements CommandHandler {
 
-    BlockingQueue<InputCommand> commands = new LinkedBlockingQueue<InputCommand>();
+    private BlockingQueue<InputCommand> inputCommands = new LinkedBlockingQueue<InputCommand>();
 
-    final BreakpointManager breakpointManager;
-    final InputCommandFactory commandFactory = new InputCommandFactory();
+    private final BreakpointHandler breakpointHandler;
+    private final InputCommandFactory inputCommandFactory = new InputCommandFactory();
 
-    public AbstractCommandHandler(BreakpointManager breakpointManager) {
+    public AbstractCommandHandler(VirtualMachine virtualMachine) {
 
-        this.breakpointManager = breakpointManager;
+        breakpointHandler = new BreakpointHandler(virtualMachine, this);
+    }
+
+    private void setCommand(InputCommand inputCommand) {
+
+        inputCommands.add(inputCommand);
     }
 
     public InputCommand retrieveCommand() {
         try {
-            return commands.take();
+            return inputCommands.take();
         } catch (InterruptedException ex) {
             ex.printStackTrace();
         }
 
         throw new IllegalStateException("Not able to retrieve the command.");
+    }
+
+    public void run() {
+
+        String lastCmd = null;
+
+        while (true) {
+            try {
+                StringBuilder sb = new StringBuilder();
+                InputStreamReader reader = new InputStreamReader(System.in);
+
+                if (reader.ready()) {
+                    int data = reader.read();
+
+                    while (reader.ready()) {
+                        sb.append((char) data);
+                        data = reader.read();
+                    }
+
+                    String cmd = sb.toString();
+
+                    if (cmd != null) {
+                        cmd = cmd.trim();
+                    }
+
+                    if (cmd == null || cmd.isEmpty()) {
+                        if (lastCmd != null) {
+                            cmd = lastCmd;
+                        } else {
+                            continue;
+                        }
+                    }
+
+                    lastCmd = cmd;
+
+                    InputCommand inputCommand = inputCommandFactory.create(cmd);
+
+                    switch (inputCommand.getType()) {
+                        case QUIT:
+                            return;
+                        case BREAK:
+                            breakpointHandler.addBreakpoint(inputCommand);
+                            break;
+                        case NEXT:
+                        case CONTINUE:
+                            setCommand(inputCommand);
+                            break;
+                    }
+                }
+            } catch (Exception ex) {
+                System.err.println("The console command handler is unable to carry out the command.");
+                ex.printStackTrace();
+                return;
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+                System.err.println("The console command handler quit unexpectedly.");
+                ex.printStackTrace();
+                return;
+            }
+        }
     }
 }

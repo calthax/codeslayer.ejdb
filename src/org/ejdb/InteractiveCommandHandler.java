@@ -17,56 +17,16 @@
  */
 package org.ejdb;
 
-import java.io.InputStreamReader;
+import com.sun.jdi.VirtualMachine;
 
 public class InteractiveCommandHandler extends AbstractCommandHandler {
 
-    public InteractiveCommandHandler(BreakpointManager breakpointManager) {
+    public InteractiveCommandHandler(VirtualMachine virtualMachine) {
         
-        super(breakpointManager);
+        super(virtualMachine);
     }
 
     public void sendCommand(OutputCommand command) {
 
-    }
-
-    public void run() {
-
-        while (true) {
-            try {
-                StringBuilder sb = new StringBuilder();
-                InputStreamReader reader = new InputStreamReader(System.in);
-
-                if (reader.ready()) {
-                    int data = reader.read();
-
-                    while (reader.ready()) {
-                        sb.append((char) data);
-                        data = reader.read();
-                    }
-
-                    String cmd = sb.toString();
-
-                    InputCommand command = commandFactory.create(cmd);
-
-                    switch (command.getType()) {
-                        case QUIT:
-                            return;
-                        case BREAK:
-                            breakpointManager.addBreakpoint(command);
-                            break;
-                    }
-                }
-            } catch (Exception ex) {
-                System.err.println("The interactive command handler is unable to carry out the command.\n");
-                System.exit(1);
-            }
-
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ex) {
-                System.err.println("The interactive command handler quit unexpectedly.");
-            }
-        }
     }
 }

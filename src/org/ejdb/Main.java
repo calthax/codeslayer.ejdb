@@ -48,23 +48,20 @@ public class Main {
             // keep running while threads are still alive
         } while (commandHandlerThread.isAlive() && eventHandlerThread.isAlive());
 
-        System.out.println("shutting down");
-
         virtualMachine.dispose();
+        System.exit(1);
     }
 
     private static CommandHandler createCommandHandler(VirtualMachine virtualMachine, String args[]) {
-
-        BreakpointManager breakpointManager = new BreakpointManager(virtualMachine);
 
         if (args != null && args.length > 0) {
             String type = args[0];
             System.out.println("type is " + type);
             if (type.equals("--interpreter=mi")) {
-                return new InteractiveCommandHandler(breakpointManager);
+                return new InteractiveCommandHandler(virtualMachine);
             }
         }
 
-        return new ConsoleCommandHandler(breakpointManager);
+        return new ConsoleCommandHandler(virtualMachine);
     }
 }

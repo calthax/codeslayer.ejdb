@@ -43,9 +43,8 @@ public class VMConnector {
 
     private AttachingConnector getConnector() {
 
-        VirtualMachineManager vmManager = Bootstrap.virtualMachineManager();
-        for (Connector connector : vmManager.attachingConnectors()) {
-            System.out.println(connector.name());
+        VirtualMachineManager virtualMachineManager = Bootstrap.virtualMachineManager();
+        for (Connector connector : virtualMachineManager.attachingConnectors()) {
             if ("com.sun.jdi.SocketAttach".equals(connector.name())) {
                 return (AttachingConnector) connector;
             }
@@ -57,13 +56,13 @@ public class VMConnector {
     private VirtualMachine connect(AttachingConnector connector, String port)
         throws IllegalConnectorArgumentsException, IOException {
         
-        Map<String, Connector.Argument> args = connector.defaultArguments();
-        Connector.Argument pidArgument = args.get("port");
+        Map<String, Connector.Argument> defaultArguments = connector.defaultArguments();
+        Connector.Argument pidArgument = defaultArguments.get("port");
         if (pidArgument == null) {
             throw new IllegalStateException();
         }
         pidArgument.setValue(port);
 
-        return connector.attach(args);
+        return connector.attach(defaultArguments);
     }
 }
