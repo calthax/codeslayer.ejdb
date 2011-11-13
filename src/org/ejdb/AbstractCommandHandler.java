@@ -36,6 +36,7 @@ public abstract class AbstractCommandHandler implements CommandHandler {
 
     private void setCommand(InputCommand inputCommand) {
 
+        inputCommands.clear();
         inputCommands.add(inputCommand);
     }
 

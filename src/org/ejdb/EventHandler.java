@@ -28,6 +28,7 @@ import com.sun.jdi.event.EventSet;
 import com.sun.jdi.event.StepEvent;
 import com.sun.jdi.event.VMDeathEvent;
 import com.sun.jdi.event.VMDisconnectEvent;
+import com.sun.jdi.request.StepRequest;
 
 public class EventHandler implements Runnable {
 
@@ -52,28 +53,43 @@ public class EventHandler implements Runnable {
             try {
                 EventSet eventSet = eventQueue.remove();
                 for (Event event : eventSet) {
+//                    System.out.println(event);
+
                     if (event instanceof VMDeathEvent || event instanceof VMDisconnectEvent) {
                         return;
                     } else if (event instanceof BreakpointEvent) {
                         BreakpointEvent breakpointEvent = (BreakpointEvent)event;
-                        StackFrame stackFrame = breakpointEvent.thread().frame(0);
-                        Location location = stackFrame.location();
-
+                        virtualMachine.suspend();
+                        Location location = breakpointEvent.location();
+                        
                         sendCommand(OutputCommand.Type.HIT_BREAKPOINT, location);
-                        next(breakpointEvent.thread());
+                        nextCommand(breakpointEvent.thread());
                     } else if (event instanceof StepEvent) {
                         StepEvent stepEvent = (StepEvent)event;
+                        virtualMachine.suspend();
                         Location location = stepEvent.location();
 
-                        sendCommand(OutputCommand.Type.STEP_LINE, location);
-                        next(stepEvent.thread());
+                        Integer stepLine = (Integer)stepEvent.request().getProperty("STEP_LINE");
+                        switch (stepLine) {
+                            case StepRequest.STEP_OVER :
+                                sendCommand(OutputCommand.Type.STEP_OVER_LINE, location);
+                                break;
+                            case StepRequest.STEP_INTO :
+                                sendCommand(OutputCommand.Type.STEP_INTO_LINE, location);
+                                break;
+                            case StepRequest.STEP_OUT :
+                                sendCommand(OutputCommand.Type.STEP_OUT_LINE, location);
+                                break;
+                        }
+
+                        nextCommand(stepEvent.thread());
                     }
                 }
                 eventSet.resume();
-            } catch (Exception ex) {
-                System.err.println("Not able to carry out the command.");
-                ex.printStackTrace();
-                break;
+            } catch (Exception e) {
+                System.err.println("Not able to carry out the event.");
+                e.printStackTrace();
+                return;
             }
         }
     }
@@ -81,13 +97,13 @@ public class EventHandler implements Runnable {
     private void sendCommand(OutputCommand.Type type, Location location)
             throws Exception {
 
-        OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.STEP_LINE, location.sourcePath(), location.lineNumber());
+        OutputCommand outputCommand = new OutputCommand(type, location.sourcePath(), location.lineNumber());
         String text = sourceHandler.getLine(location.sourcePath(), location.lineNumber());
         outputCommand.setText(text);
         commandHandler.sendCommand(outputCommand);
     }
 
-    private void next(ThreadReference threadReference)
+    private void nextCommand(ThreadReference threadReference)
             throws Exception {
 
         InputCommand inputCommand = commandHandler.retrieveCommand();
@@ -102,7 +118,7 @@ public class EventHandler implements Runnable {
                 stepHandler.finish(threadReference);
                 break;
             case CONTINUE:
-                stepHandler.cont();
+                stepHandler.cont(threadReference);
                 break;
         }
     }

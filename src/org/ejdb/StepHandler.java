@@ -26,6 +26,8 @@ import java.util.List;
 
 public class StepHandler {
 
+    static final String STEP_LINE = "STEP_LINE";
+
     private final VirtualMachine virtualMachine;
     private final EventRequestManager eventRequestManager;
 
@@ -53,8 +55,9 @@ public class StepHandler {
         createNextStep(threadReference, StepRequest.STEP_LINE, StepRequest.STEP_OUT);
     }
 
-    public void cont() {
+    public void cont(ThreadReference threadReference) {
 
+        clearPreviousStep(threadReference);
         virtualMachine.resume();
     }
 
@@ -74,8 +77,10 @@ public class StepHandler {
     private void createNextStep(ThreadReference threadReference, int size, int depth) {
 
         StepRequest stepRequest = eventRequestManager.createStepRequest(threadReference, size, depth);
+        stepRequest.putProperty("STEP_LINE", depth);
         stepRequest.addCountFilter(1);
         stepRequest.enable();
+//        System.out.println(stepRequest);
         virtualMachine.resume();
     }
 }
