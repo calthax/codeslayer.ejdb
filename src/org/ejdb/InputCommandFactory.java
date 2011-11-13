@@ -26,6 +26,8 @@ public class InputCommandFactory {
         switch (commandType) {
             case QUIT:
             case NEXT:
+            case STEP:
+            case FINISH:
             case CONTINUE:
                 return new InputCommand(commandType);
             case BREAK:

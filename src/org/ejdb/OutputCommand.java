@@ -52,6 +52,6 @@ public class OutputCommand extends Command {
 
         ADD_BREAKPOINT,
         HIT_BREAKPOINT,
-        STEP_OVER;
+        STEP_LINE;
     }
 }

@@ -40,11 +40,10 @@ public abstract class AbstractCommandHandler implements CommandHandler {
     }
 
     public InputCommand retrieveCommand() {
+        
         try {
             return inputCommands.take();
-        } catch (InterruptedException ex) {
-            ex.printStackTrace();
-        }
+        } catch (InterruptedException ex) {}
 
         throw new IllegalStateException("Not able to retrieve the command.");
     }
@@ -91,6 +90,8 @@ public abstract class AbstractCommandHandler implements CommandHandler {
                             breakpointHandler.addBreakpoint(inputCommand);
                             break;
                         case NEXT:
+                        case STEP:
+                        case FINISH:
                         case CONTINUE:
                             setCommand(inputCommand);
                             break;
@@ -98,7 +99,6 @@ public abstract class AbstractCommandHandler implements CommandHandler {
                 }
             } catch (Exception ex) {
                 System.err.println("The console command handler is unable to carry out the command.");
-                ex.printStackTrace();
                 return;
             }
 
@@ -106,7 +106,6 @@ public abstract class AbstractCommandHandler implements CommandHandler {
                 Thread.sleep(100);
             } catch (InterruptedException ex) {
                 System.err.println("The console command handler quit unexpectedly.");
-                ex.printStackTrace();
                 return;
             }
         }

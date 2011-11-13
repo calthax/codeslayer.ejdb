@@ -41,6 +41,8 @@ public class InputCommand extends Command {
 
         BREAK("break"),
         NEXT("n"),
+        STEP("s"),
+        FINISH("f"),
         CONTINUE("c"),
         QUIT("q");
 
@@ -59,7 +61,7 @@ public class InputCommand extends Command {
                 }
             }
             
-            throw new IllegalStateException(key + " is not a valid input key");
+            throw new IllegalStateException(key + " is not a valid command.");
         }
     }
 }

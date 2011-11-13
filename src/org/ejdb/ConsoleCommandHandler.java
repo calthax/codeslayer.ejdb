@@ -26,17 +26,17 @@ public class ConsoleCommandHandler extends AbstractCommandHandler {
         super(virtualMachine);
     }
 
-    public void sendCommand(OutputCommand command) {
+    public void sendCommand(OutputCommand outputCommand) {
 
-        switch (command.getType()) {
+        switch (outputCommand.getType()) {
             case ADD_BREAKPOINT:
-                System.out.printf("Add breakpoint at %s:%d\n", command.getClassName(), command.getLineNumber());
+                System.out.printf("Add breakpoint at %s:%d\n", outputCommand.getClassName(), outputCommand.getLineNumber());
                 break;
             case HIT_BREAKPOINT:
-                System.out.printf("Hit breakpoint at %s:%d\n", command.getClassName(), command.getLineNumber());
+                System.out.printf("Hit breakpoint at %s:%d\n", outputCommand.getClassName(), outputCommand.getLineNumber());
                 break;
-            case STEP_OVER:
-                System.out.printf("%d %s\n", command.getLineNumber(), command.getText());
+            case STEP_LINE:
+                System.out.printf("%d %s\n", outputCommand.getLineNumber(), outputCommand.getText());
                 break;
         }
     }

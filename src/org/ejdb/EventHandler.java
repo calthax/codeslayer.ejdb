@@ -18,32 +18,30 @@
 package org.ejdb;
 
 import com.sun.jdi.Location;
+import com.sun.jdi.StackFrame;
 import com.sun.jdi.ThreadReference;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.event.BreakpointEvent;
 import com.sun.jdi.event.Event;
 import com.sun.jdi.event.EventQueue;
 import com.sun.jdi.event.EventSet;
-import com.sun.jdi.event.LocatableEvent;
 import com.sun.jdi.event.StepEvent;
 import com.sun.jdi.event.VMDeathEvent;
 import com.sun.jdi.event.VMDisconnectEvent;
-import com.sun.jdi.request.EventRequestManager;
-import com.sun.jdi.request.StepRequest;
 
 public class EventHandler implements Runnable {
 
     private final VirtualMachine virtualMachine;
     private final CommandHandler commandHandler;
     private final SourceHandler sourceHandler;
-    private final EventRequestManager eventRequestManager;
+    private final StepHandler stepHandler;
 
     public EventHandler(VirtualMachine virtualMachine, CommandHandler commandHandler, SourceHandler sourceHandler) {
 
         this.virtualMachine = virtualMachine;
         this.commandHandler = commandHandler;
         this.sourceHandler = sourceHandler;
-        this.eventRequestManager = virtualMachine.eventRequestManager();
+        this.stepHandler = new StepHandler(virtualMachine);
     }
 
     public void run() {
@@ -58,41 +56,17 @@ public class EventHandler implements Runnable {
                         return;
                     } else if (event instanceof BreakpointEvent) {
                         BreakpointEvent breakpointEvent = (BreakpointEvent)event;
-                        Location location = breakpointEvent.location();
+                        StackFrame stackFrame = breakpointEvent.thread().frame(0);
+                        Location location = stackFrame.location();
 
-                        OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.HIT_BREAKPOINT, location.sourcePath(), location.lineNumber());
-                        commandHandler.sendCommand(outputCommand);
-                        
-                        InputCommand inputCommand = commandHandler.retrieveCommand();
-                        switch (inputCommand.getType()) {
-                            case NEXT:
-                                next(breakpointEvent);
-                                break;
-                            case CONTINUE:
-                                cont();
-                                break;
-                        }
+                        sendCommand(OutputCommand.Type.HIT_BREAKPOINT, location);
+                        next(breakpointEvent.thread());
                     } else if (event instanceof StepEvent) {
                         StepEvent stepEvent = (StepEvent)event;
                         Location location = stepEvent.location();
 
-                        OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.STEP_OVER, location.sourcePath(), location.lineNumber());
-                        String text = sourceHandler.getLine(location.sourcePath(),location.lineNumber());
-                        outputCommand.setText(text);
-
-                        eventRequestManager.deleteEventRequest(stepEvent.request());
-
-                        commandHandler.sendCommand(outputCommand);
-
-                        InputCommand inputCommand = commandHandler.retrieveCommand();
-                        switch (inputCommand.getType()) {
-                            case NEXT:
-                                next(stepEvent);
-                                break;
-                            case CONTINUE:
-                                cont();
-                                break;
-                        }
+                        sendCommand(OutputCommand.Type.STEP_LINE, location);
+                        next(stepEvent.thread());
                     }
                 }
                 eventSet.resume();
@@ -101,27 +75,35 @@ public class EventHandler implements Runnable {
                 ex.printStackTrace();
                 break;
             }
-
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ex) {
-                System.err.println("The event handler quit unexpectedly.");
-                ex.printStackTrace();
-                break;
-            }
         }
     }
 
-    private void next(LocatableEvent locatableEvent) {
+    private void sendCommand(OutputCommand.Type type, Location location)
+            throws Exception {
 
-        ThreadReference thread = locatableEvent.thread();
-        StepRequest stepRequest = eventRequestManager.createStepRequest(thread, StepRequest.STEP_LINE, StepRequest.STEP_OVER);
-        stepRequest.enable();
-        virtualMachine.resume();
+        OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.STEP_LINE, location.sourcePath(), location.lineNumber());
+        String text = sourceHandler.getLine(location.sourcePath(), location.lineNumber());
+        outputCommand.setText(text);
+        commandHandler.sendCommand(outputCommand);
     }
 
-    private void cont() {
+    private void next(ThreadReference threadReference)
+            throws Exception {
 
-        virtualMachine.resume();
+        InputCommand inputCommand = commandHandler.retrieveCommand();
+        switch (inputCommand.getType()) {
+            case NEXT:
+                stepHandler.next(threadReference);
+                break;
+            case STEP:
+                stepHandler.step(threadReference);
+                break;
+            case FINISH:
+                stepHandler.finish(threadReference);
+                break;
+            case CONTINUE:
+                stepHandler.cont();
+                break;
+        }
     }
 }

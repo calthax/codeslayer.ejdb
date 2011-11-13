@@ -18,6 +18,7 @@
 package org.ejdb;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
@@ -30,19 +31,23 @@ public class SourceHandler {
         this.sourcePaths = sourcePaths;
     }
 
-    public String getLine(String sourcePath, int lineNumber) {
+    public String getLine(String className, int lineNumber) {
 
-        String result = "";
+        String result = null;
+
+        File file = getFile(className);
+        if (file == null) {
+            System.err.printf("Not able to get the source for class %s.\n", className);
+            return "";
+        }
 
         try {
-            String filePath = sourcePaths[0] + sourcePath;
-
-            FileReader input = new FileReader(filePath);
+            FileReader input = new FileReader(file);
             BufferedReader reader = new BufferedReader(input);
 
             int count = 1;
             String line = reader.readLine();
-            while (line != null){
+            while (line != null) {
                 if (count == lineNumber) {
                     result = line;
                     break;
@@ -52,10 +57,23 @@ public class SourceHandler {
             }
 
             reader.close();
-        } catch (IOException e){
-            e.printStackTrace();
+        }
+        catch (IOException e) {
+            System.err.printf("Not able to get the source for class %s.\n", className);
         }
 
         return result;
+    }
+
+    private File getFile(String className) {
+
+        for (String sourcePath : sourcePaths) {
+            File file = new File(sourcePath, className);
+            if (file != null && file.exists()) {
+                return file;
+            }
+        }
+
+        return null;
     }
 }

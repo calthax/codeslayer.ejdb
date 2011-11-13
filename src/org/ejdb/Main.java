@@ -36,7 +36,8 @@ public class Main {
         CommandHandler commandHandler = createCommandHandler(virtualMachine, args);
         Thread commandHandlerThread = new Thread(commandHandler);
 
-        SourceHandler sourceHandler = new SourceHandler(new String[]{"/home/jeff/workspace/jmesaWeb/src/"});
+        SourceHandler sourceHandler = new SourceHandler(
+                new String[]{"/home/jeff/workspace/jmesaWeb/src/", "/home/jeff/workspace/jmesa/src/"});
 
         EventHandler eventHandler = new EventHandler(virtualMachine, commandHandler, sourceHandler);
         Thread eventHandlerThread = new Thread(eventHandler);
@@ -56,11 +57,12 @@ public class Main {
 
         if (args != null && args.length > 0) {
             String type = args[0];
-            System.out.println("type is " + type);
             if (type.equals("--interpreter=mi")) {
                 return new InteractiveCommandHandler(virtualMachine);
             }
         }
+
+        //-sourcepath=<dir1:dir2:...>
 
         return new ConsoleCommandHandler(virtualMachine);
     }
