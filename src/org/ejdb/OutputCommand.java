@@ -51,6 +51,8 @@ public class OutputCommand extends Command {
     public enum Type {
 
         ADD_BREAKPOINT,
+        DELETE_BREAKPOINT,
+        DELETE_ALL_BREAKPOINTS,
         HIT_BREAKPOINT,
         STEP_OVER_LINE,
         STEP_INTO_LINE,

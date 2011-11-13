@@ -90,6 +90,9 @@ public abstract class AbstractCommandHandler implements CommandHandler {
                         case BREAK:
                             breakpointHandler.addBreakpoint(inputCommand);
                             break;
+                        case DELETE:
+                            breakpointHandler.deleteBreakpoint(inputCommand);
+                            break;
                         case NEXT:
                         case STEP:
                         case FINISH:
@@ -98,14 +101,14 @@ public abstract class AbstractCommandHandler implements CommandHandler {
                             break;
                     }
                 }
-            } catch (Exception ex) {
+            } catch (Exception e) {
                 System.err.println("The console command handler is unable to carry out the command.");
                 return;
             }
 
             try {
                 Thread.sleep(100);
-            } catch (InterruptedException ex) {
+            } catch (InterruptedException e) {
                 System.err.println("The console command handler quit unexpectedly.");
                 return;
             }

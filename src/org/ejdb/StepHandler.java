@@ -77,10 +77,9 @@ public class StepHandler {
     private void createNextStep(ThreadReference threadReference, int size, int depth) {
 
         StepRequest stepRequest = eventRequestManager.createStepRequest(threadReference, size, depth);
-        stepRequest.putProperty("STEP_LINE", depth);
+        stepRequest.putProperty(STEP_LINE, depth);
         stepRequest.addCountFilter(1);
         stepRequest.enable();
-//        System.out.println(stepRequest);
         virtualMachine.resume();
     }
 }

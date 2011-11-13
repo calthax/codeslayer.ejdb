@@ -39,11 +39,12 @@ public class InputCommand extends Command {
 
     public enum Type {
 
-        BREAK("break"),
         NEXT("n"),
         STEP("s"),
         FINISH("f"),
         CONTINUE("c"),
+        BREAK("break"),
+        DELETE("delete"),
         QUIT("q");
 
         private final String key;

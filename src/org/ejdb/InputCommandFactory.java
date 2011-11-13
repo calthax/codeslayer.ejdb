@@ -31,11 +31,9 @@ public class InputCommandFactory {
             case CONTINUE:
                 return new InputCommand(commandType);
             case BREAK:
-                String substring = cmd.substring("break ".length(), cmd.length());
-                String[] split = substring.split(":");
-                String className = split[0];
-                String lineStr = split[1];
-                return new InputCommand(commandType, className, Integer.valueOf(lineStr));
+                return getBreakCommand(cmd, commandType);
+            case DELETE:
+                return getDeleteCommand(cmd, commandType);
         }
 
         return null;
@@ -43,10 +41,35 @@ public class InputCommandFactory {
 
     private InputCommand.Type getCommandType(String cmd) {
 
-        if (cmd.startsWith("break ")) { // break org.jmesaweb.controller.BasicPresidentController:63
+        if (cmd.startsWith("break")) { // break org.jmesaweb.controller.BasicPresidentController:63
             return InputCommand.Type.BREAK;
+        } else if (cmd.startsWith("delete")) { // delete org.jmesaweb.controller.BasicPresidentController:63
+            return InputCommand.Type.DELETE;
         }
 
         return InputCommand.Type.getTypeByKey(cmd);
+    }
+
+    private InputCommand getBreakCommand(String cmd, InputCommand.Type commandType) {
+
+        String substring = cmd.substring("break ".length(), cmd.length());
+        String[] split = substring.split(":");
+        String className = split[0];
+        String lineStr = split[1];
+        return new InputCommand(commandType, className, Integer.valueOf(lineStr));
+    }
+
+    private InputCommand getDeleteCommand(String cmd, InputCommand.Type commandType) {
+
+        String trimCommand = cmd.trim();
+        if (trimCommand.equals("delete")) {
+            return new InputCommand(commandType);
+        }
+
+        String substring = cmd.substring("delete ".length(), cmd.length());
+        String[] split = substring.split(":");
+        String className = split[0];
+        String lineStr = split[1];
+        return new InputCommand(commandType, className, Integer.valueOf(lineStr));
     }
 }

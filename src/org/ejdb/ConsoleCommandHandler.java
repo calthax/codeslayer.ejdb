@@ -47,6 +47,12 @@ public class ConsoleCommandHandler extends AbstractCommandHandler {
                 System.out.printf("Step to %s:%d\n", outputCommand.getClassName(), outputCommand.getLineNumber());
                 System.out.printf("%d %s\n", outputCommand.getLineNumber(), outputCommand.getText());
                 break;
+            case DELETE_ALL_BREAKPOINTS:
+                System.out.printf("Delete all breakpoints.\n");
+                break;
+            case DELETE_BREAKPOINT:
+                System.out.printf("Delete breakpoint at %s:%d\n", outputCommand.getClassName(), outputCommand.getLineNumber());
+                break;
         }
     }
 }

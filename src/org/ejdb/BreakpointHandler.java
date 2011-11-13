@@ -22,6 +22,8 @@ import com.sun.jdi.ReferenceType;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.EventRequestManager;
+import com.sun.jdi.request.StepRequest;
+import java.util.Iterator;
 import java.util.List;
 
 public class BreakpointHandler {
@@ -59,5 +61,33 @@ public class BreakpointHandler {
 
         OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.ADD_BREAKPOINT, inputCommand.getClassName(), inputCommand.getLineNumber());
         commandHandler.sendCommand(outputCommand);
+    }
+    
+    public void deleteBreakpoint(InputCommand inputCommand)
+            throws Exception {
+
+        if (inputCommand.getClassName() == null || inputCommand.getLineNumber() == null) {
+            eventRequestManager.deleteAllBreakpoints();
+            OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.DELETE_ALL_BREAKPOINTS);
+            commandHandler.sendCommand(outputCommand);
+        } else {
+            List<BreakpointRequest> breakpointRequests = eventRequestManager.breakpointRequests();
+            Iterator iter = breakpointRequests.iterator();
+            while (iter.hasNext()) {
+                BreakpointRequest breakpointRequest = (BreakpointRequest)iter.next();
+                Location location = breakpointRequest.location();
+
+                String sourcePath = location.sourcePath();
+                sourcePath = sourcePath.replace("/", ".");
+                int lineNumber = location.lineNumber();
+
+                if (sourcePath.startsWith(inputCommand.getClassName()) && inputCommand.getLineNumber().equals(lineNumber)) {
+                    eventRequestManager.deleteEventRequest(breakpointRequest);
+                    OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.DELETE_BREAKPOINT, inputCommand.getClassName(), inputCommand.getLineNumber());
+                    commandHandler.sendCommand(outputCommand);
+                    return;
+                }
+            }
+        }
     }
 }

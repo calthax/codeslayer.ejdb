@@ -53,8 +53,6 @@ public class EventHandler implements Runnable {
             try {
                 EventSet eventSet = eventQueue.remove();
                 for (Event event : eventSet) {
-//                    System.out.println(event);
-
                     if (event instanceof VMDeathEvent || event instanceof VMDisconnectEvent) {
                         return;
                     } else if (event instanceof BreakpointEvent) {
@@ -88,7 +86,6 @@ public class EventHandler implements Runnable {
                 eventSet.resume();
             } catch (Exception e) {
                 System.err.println("Not able to carry out the event.");
-                e.printStackTrace();
                 return;
             }
         }
