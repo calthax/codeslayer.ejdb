@@ -53,6 +53,9 @@ public class ConsoleCommandHandler extends AbstractCommandHandler {
             case DELETE_BREAKPOINT:
                 System.out.printf("Delete breakpoint at %s:%d\n", outputCommand.getClassName(), outputCommand.getLineNumber());
                 break;
+            case PRINT_VALUE:
+                System.out.printf("%s\n", outputCommand.getText());
+                break;
         }
     }
 }

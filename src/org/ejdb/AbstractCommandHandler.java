@@ -24,6 +24,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public abstract class AbstractCommandHandler implements CommandHandler {
 
+    /*Use a blocking queue to handle the input command*/
     private BlockingQueue<InputCommand> inputCommands = new LinkedBlockingQueue<InputCommand>();
 
     private final BreakpointHandler breakpointHandler;
@@ -43,6 +44,7 @@ public abstract class AbstractCommandHandler implements CommandHandler {
     public InputCommand retrieveCommand() {
         
         try {
+            inputCommands.clear();
             return inputCommands.take();
         } catch (InterruptedException ex) {}
 
@@ -93,16 +95,14 @@ public abstract class AbstractCommandHandler implements CommandHandler {
                         case DELETE:
                             breakpointHandler.deleteBreakpoint(inputCommand);
                             break;
-                        case NEXT:
-                        case STEP:
-                        case FINISH:
-                        case CONTINUE:
+                        default:
                             setCommand(inputCommand);
                             break;
                     }
                 }
             } catch (Exception e) {
                 System.err.println("The console command handler is unable to carry out the command.");
+                e.printStackTrace();
                 return;
             }
 

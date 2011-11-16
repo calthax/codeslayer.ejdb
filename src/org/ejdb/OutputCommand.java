@@ -56,6 +56,7 @@ public class OutputCommand extends Command {
         HIT_BREAKPOINT,
         STEP_OVER_LINE,
         STEP_INTO_LINE,
-        STEP_OUT_LINE;
+        STEP_OUT_LINE,
+        PRINT_VALUE;
     }
 }

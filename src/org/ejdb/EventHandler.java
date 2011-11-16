@@ -18,7 +18,6 @@
 package org.ejdb;
 
 import com.sun.jdi.Location;
-import com.sun.jdi.StackFrame;
 import com.sun.jdi.ThreadReference;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.event.BreakpointEvent;
@@ -36,6 +35,7 @@ public class EventHandler implements Runnable {
     private final CommandHandler commandHandler;
     private final SourceHandler sourceHandler;
     private final StepHandler stepHandler;
+    private final PrintHandler printHandler;
 
     public EventHandler(VirtualMachine virtualMachine, CommandHandler commandHandler, SourceHandler sourceHandler) {
 
@@ -43,6 +43,7 @@ public class EventHandler implements Runnable {
         this.commandHandler = commandHandler;
         this.sourceHandler = sourceHandler;
         this.stepHandler = new StepHandler(virtualMachine);
+        this.printHandler = new PrintHandler(commandHandler);
     }
 
     public void run() {
@@ -61,7 +62,7 @@ public class EventHandler implements Runnable {
                         Location location = breakpointEvent.location();
                         
                         sendCommand(OutputCommand.Type.HIT_BREAKPOINT, location);
-                        nextCommand(breakpointEvent.thread());
+                        stepRequest(breakpointEvent.thread());
                     } else if (event instanceof StepEvent) {
                         StepEvent stepEvent = (StepEvent)event;
                         virtualMachine.suspend();
@@ -80,7 +81,7 @@ public class EventHandler implements Runnable {
                                 break;
                         }
 
-                        nextCommand(stepEvent.thread());
+                        stepRequest(stepEvent.thread());
                     }
                 }
                 eventSet.resume();
@@ -100,11 +101,15 @@ public class EventHandler implements Runnable {
         commandHandler.sendCommand(outputCommand);
     }
 
-    private void nextCommand(ThreadReference threadReference)
+    private void stepRequest(ThreadReference threadReference)
             throws Exception {
 
         InputCommand inputCommand = commandHandler.retrieveCommand();
         switch (inputCommand.getType()) {
+            case PRINT:
+                printHandler.value(threadReference, inputCommand);
+                stepRequest(threadReference);
+                break;
             case NEXT:
                 stepHandler.next(threadReference);
                 break;

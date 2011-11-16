@@ -20,6 +20,7 @@ package org.ejdb;
 public class InputCommand extends Command {
 
     private final Type type;
+    private String variable;
 
     public InputCommand(Type type) {
 
@@ -37,6 +38,16 @@ public class InputCommand extends Command {
         return type;
     }
 
+    public String getVariable() {
+
+        return variable;
+    }
+
+    public void setVariableName(String variable) {
+
+        this.variable = variable;
+    }
+
     public enum Type {
 
         NEXT("n"),
@@ -45,6 +56,7 @@ public class InputCommand extends Command {
         CONTINUE("c"),
         BREAK("break"),
         DELETE("delete"),
+        PRINT("p"),
         QUIT("q");
 
         private final String key;

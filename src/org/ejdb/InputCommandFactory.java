@@ -24,19 +24,15 @@ public class InputCommandFactory {
         InputCommand.Type commandType = getCommandType(cmd);
 
         switch (commandType) {
-            case QUIT:
-            case NEXT:
-            case STEP:
-            case FINISH:
-            case CONTINUE:
-                return new InputCommand(commandType);
             case BREAK:
                 return getBreakCommand(cmd, commandType);
             case DELETE:
                 return getDeleteCommand(cmd, commandType);
+            case PRINT:
+                return getPrintCommand(cmd, commandType);
+            default:
+                return new InputCommand(commandType);
         }
-
-        return null;
     }
 
     private InputCommand.Type getCommandType(String cmd) {
@@ -45,6 +41,8 @@ public class InputCommandFactory {
             return InputCommand.Type.BREAK;
         } else if (cmd.startsWith("delete")) { // delete org.jmesaweb.controller.BasicPresidentController:63
             return InputCommand.Type.DELETE;
+        } else if (cmd.startsWith("p")) {
+            return InputCommand.Type.PRINT;
         }
 
         return InputCommand.Type.getTypeByKey(cmd);
@@ -71,5 +69,13 @@ public class InputCommandFactory {
         String className = split[0];
         String lineStr = split[1];
         return new InputCommand(commandType, className, Integer.valueOf(lineStr));
+    }
+
+    private InputCommand getPrintCommand(String cmd, InputCommand.Type commandType) {
+
+        String variableName = cmd.substring("p ".length(), cmd.length());
+        InputCommand inputCommand = new InputCommand(commandType);
+        inputCommand.setVariableName(variableName);
+        return inputCommand;
     }
 }
