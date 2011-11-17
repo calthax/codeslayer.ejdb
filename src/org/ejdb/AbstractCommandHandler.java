@@ -86,6 +86,13 @@ public abstract class AbstractCommandHandler implements CommandHandler {
 
                     InputCommand inputCommand = inputCommandFactory.create(cmd);
 
+                    if (inputCommand == null) {
+                        OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.INVALID_COMMAND);
+                        outputCommand.setText(cmd);
+                        sendCommand(outputCommand);
+                        continue;
+                    }
+
                     switch (inputCommand.getType()) {
                         case QUIT:
                             return;

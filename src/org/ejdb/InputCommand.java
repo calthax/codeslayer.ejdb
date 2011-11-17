@@ -74,7 +74,7 @@ public class InputCommand extends Command {
                 }
             }
             
-            throw new IllegalStateException(key + " is not a valid command.");
+            return null;
         }
     }
 }

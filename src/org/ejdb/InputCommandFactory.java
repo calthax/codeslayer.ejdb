@@ -23,6 +23,10 @@ public class InputCommandFactory {
 
         InputCommand.Type commandType = getCommandType(cmd);
 
+        if (commandType == null) {
+            return null;
+        }
+
         switch (commandType) {
             case BREAK:
                 return getBreakCommand(cmd, commandType);
@@ -50,11 +54,25 @@ public class InputCommandFactory {
 
     private InputCommand getBreakCommand(String cmd, InputCommand.Type commandType) {
 
-        String substring = cmd.substring("break ".length(), cmd.length());
+        int length = cmd.length();
+        if (length <= 6) {
+            return null;
+        }
+
+        String substring = cmd.substring("break ".length(), length);
         String[] split = substring.split(":");
-        String className = split[0];
-        String lineStr = split[1];
-        return new InputCommand(commandType, className, Integer.valueOf(lineStr));
+        if (split == null || split.length != 2) {
+            return null;
+        }
+
+        try {
+            String className = split[0];
+            String lineStr = split[1];
+            Integer lineNumber = Integer.valueOf(lineStr);
+            return new InputCommand(commandType, className, lineNumber);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 
     private InputCommand getDeleteCommand(String cmd, InputCommand.Type commandType) {

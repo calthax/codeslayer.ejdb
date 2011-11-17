@@ -29,6 +29,9 @@ public class ConsoleCommandHandler extends AbstractCommandHandler {
     public void sendCommand(OutputCommand outputCommand) {
 
         switch (outputCommand.getType()) {
+            case INVALID_COMMAND:
+                System.out.printf("Invalid command: \"%s\".\n", outputCommand.getText());
+                break;
             case ADD_BREAKPOINT:
                 System.out.printf("Add breakpoint at %s:%d\n", outputCommand.getClassName(), outputCommand.getLineNumber());
                 break;
