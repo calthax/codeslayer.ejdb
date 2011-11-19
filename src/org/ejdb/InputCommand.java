@@ -38,7 +38,7 @@ public class InputCommand extends Command {
         return type;
     }
 
-    public String getVariable() {
+    public String getVariableName() {
 
         return variable;
     }

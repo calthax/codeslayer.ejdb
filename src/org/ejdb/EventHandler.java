@@ -87,6 +87,7 @@ public class EventHandler implements Runnable {
                 eventSet.resume();
             } catch (Exception e) {
                 System.err.println("Not able to carry out the event.");
+                e.printStackTrace();
                 return;
             }
         }

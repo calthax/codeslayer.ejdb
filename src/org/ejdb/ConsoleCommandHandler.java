@@ -59,6 +59,9 @@ public class ConsoleCommandHandler extends AbstractCommandHandler {
             case PRINT_VALUE:
                 System.out.printf("%s\n", outputCommand.getText());
                 break;
+            case INVALID_VARIABLE:
+                System.out.printf("Invalid variable.\n");
+                break;
         }
     }
 }

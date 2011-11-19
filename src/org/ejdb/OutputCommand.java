@@ -58,6 +58,7 @@ public class OutputCommand extends Command {
         STEP_OVER_LINE,
         STEP_INTO_LINE,
         STEP_OUT_LINE,
+        INVALID_VARIABLE,
         PRINT_VALUE;
     }
 }

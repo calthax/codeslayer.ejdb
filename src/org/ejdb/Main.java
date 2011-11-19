@@ -49,6 +49,7 @@ public class Main {
             // keep running while threads are still alive
         } while (commandHandlerThread.isAlive() && eventHandlerThread.isAlive());
 
+        virtualMachine.resume();
         virtualMachine.dispose();
         System.exit(1);
     }
