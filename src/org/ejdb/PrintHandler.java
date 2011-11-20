@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
 
 public class PrintHandler {
 
-    private final String regex = "([a-zA-Z\\d_]+)\\[?(\\d*)\\]?";
+    private final static String regex = "([a-zA-Z\\d_]+)\\[?(\\d*)\\]?";
     private final Pattern pattern = Pattern.compile(regex);
 
     private final CommandHandler commandHandler;
@@ -82,9 +82,16 @@ public class PrintHandler {
 
         StackFrame stackFrame = threadReference.frame(0);
 
-        LocalVariable localVariable = stackFrame.visibleVariableByName(variableName);
+        Matcher matcher = pattern.matcher(variableName);
+        if (!matcher.find()) {
+            return null;
+        }
+
+        String name = matcher.group(1);
+
+        LocalVariable localVariable = stackFrame.visibleVariableByName(name);
         if (localVariable != null) {
-            return stackFrame.getValue(localVariable);
+            return getValueByType(matcher, stackFrame.getValue(localVariable));
         }
 
         return getValueByObjectReference(stackFrame.thisObject(), variableName);
@@ -101,23 +108,23 @@ public class PrintHandler {
         }
 
         String name = matcher.group(1);
-        String args = matcher.group(2);
 
         Field field = referenceType.fieldByName(name);
         if (field == null) {
             return null;
         }
 
-        Value value = objectReference.getValue(field);
-
-        if (args != null && args.length() > 0) {
-            value = getArrayValue(value, args);
-        }
-
-        return value;
+        return getValueByType(matcher, objectReference.getValue(field));
     }
 
-    private Value getArrayValue(Value value, String args) {
+    private Value getValueByType(Matcher matcher, Value value)
+            throws Exception {
+
+        String args = matcher.group(2);
+
+        if (args == null || args.length() == 0) {
+            return value;
+        }
 
         try {
             if (value instanceof ObjectReference) {

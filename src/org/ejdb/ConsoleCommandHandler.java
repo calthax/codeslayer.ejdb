@@ -60,7 +60,7 @@ public class ConsoleCommandHandler extends AbstractCommandHandler {
                 System.out.printf("%s\n", outputCommand.getText());
                 break;
             case INVALID_VARIABLE:
-                System.out.printf("Invalid variable.\n");
+                System.out.printf("Invalid print request.\n");
                 break;
         }
     }
