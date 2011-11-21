@@ -23,18 +23,20 @@ import com.sun.jdi.LocalVariable;
 import com.sun.jdi.ObjectReference;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.StackFrame;
+import com.sun.jdi.StringReference;
 import com.sun.jdi.ThreadReference;
 import com.sun.jdi.Value;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PrintHandler {
 
-    private final static String regex = "([a-zA-Z\\d_]+)\\[?(\\d*)\\]?";
+    private final static String regex = "([a-zA-Z\\d_]+)\\[?([a-zA-Z\\d_]*)\\]?";
     private final Pattern pattern = Pattern.compile(regex);
 
     private final CommandHandler commandHandler;
@@ -88,7 +90,7 @@ public class PrintHandler {
         }
 
         String name = matcher.group(1);
-
+        
         LocalVariable localVariable = stackFrame.visibleVariableByName(name);
         if (localVariable != null) {
             return getValueByType(matcher, stackFrame.getValue(localVariable));
@@ -126,20 +128,69 @@ public class PrintHandler {
             return value;
         }
 
-        try {
-            if (value instanceof ObjectReference) {
-                ObjectReference objectReference = (ObjectReference)value;
-                Field field = objectReference.referenceType().fieldByName("elementData");
-                if (field != null) {
-                    Value result = objectReference.getValue(field);
-                    if (result != null && result instanceof ArrayReference) {
-                        ArrayReference arrayReference = (ArrayReference)result;
+        Class<?> klass = Class.forName(value.type().name());
+
+        if (List.class.isAssignableFrom(klass)) {
+            return getListValueType(value, args);
+        } else if (Map.class.isAssignableFrom(klass)) {
+            return getMapValueType(value, args);
+        }
+
+        return null;
+    }
+
+    private Value getListValueType(Value value, String args)
+            throws Exception {
+
+        if (value instanceof ObjectReference) {
+            ObjectReference objectReference = (ObjectReference)value;
+
+            Field field = objectReference.referenceType().fieldByName("elementData");
+            if (field != null) {
+                Value result = objectReference.getValue(field);
+                if (result != null && result instanceof ArrayReference) {
+                    ArrayReference arrayReference = (ArrayReference)result;
+                    try {
                         return arrayReference.getValue(Integer.parseInt(args));
+                    } catch (IndexOutOfBoundsException e) {
+                        // just return null
                     }
                 }
             }
-        } catch (IndexOutOfBoundsException e) {
-            // just return null
+        }
+
+        return null;
+    }
+
+    private Value getMapValueType(Value value, String args)
+            throws Exception {
+
+        if (value instanceof ObjectReference) {
+            ObjectReference objectReference = (ObjectReference)value;
+
+            Field tableField = objectReference.referenceType().fieldByName("table");
+            if (tableField != null) {
+                Value tableValue = objectReference.getValue(tableField);
+                if (tableValue != null && tableValue instanceof ArrayReference) {
+                    ArrayReference tableReference = (ArrayReference)tableValue;
+                    List<Value> entryValues = tableReference.getValues();
+                    for (Value entryValue : entryValues) {
+                        if (entryValue != null && entryValue instanceof ObjectReference) {
+                            ObjectReference entryReference = (ObjectReference)entryValue;
+                            Field keyField = entryReference.referenceType().fieldByName("key");
+                            Value keyValue = entryReference.getValue(keyField);
+                            if (keyValue != null && keyValue instanceof StringReference) {
+                                StringReference keyReference = (StringReference)keyValue;
+                                String key = keyReference.value();
+                                if (key.equals(args)) {
+                                    Field valueField = entryReference.referenceType().fieldByName("value");
+                                    return entryReference.getValue(valueField);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         return null;

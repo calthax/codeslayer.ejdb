@@ -17,6 +17,7 @@
  */
 package org.ejdb;
 
+import com.sun.jdi.Type;
 import com.sun.jdi.ArrayReference;
 import com.sun.jdi.Field;
 import com.sun.jdi.LocalVariable;
@@ -106,6 +107,7 @@ public class PrintHandlerTest {
         LocalVariable localVariable = mock(LocalVariable.class);
 
         ObjectReference objectReference = mock(ObjectReference.class);
+        Type type = mock(Type.class);
         ReferenceType referenceType = mock(ReferenceType.class);
         Field field = mock (Field.class);
 
@@ -123,6 +125,8 @@ public class PrintHandlerTest {
         when(stackFrame.getValue(localVariable)).thenReturn(objectReference);
         when(objectReference.referenceType()).thenReturn(referenceType);
         when(referenceType.fieldByName("myVar")).thenReturn(field);
+        when(arrayObjectReference.type()).thenReturn(type);
+        when(type.name()).thenReturn("java.util.ArrayList");
 
         when(objectReference.getValue(field)).thenReturn(arrayObjectReference);
         when(arrayObjectReference.referenceType()).thenReturn(arrayReferenceType);
