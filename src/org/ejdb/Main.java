@@ -17,6 +17,11 @@
  */
 package org.ejdb;
 
+import org.ejdb.handler.EventHandler;
+import org.ejdb.handler.SourceHandler;
+import org.ejdb.handler.ConsoleCommandHandler;
+import org.ejdb.handler.CommandHandler;
+import org.ejdb.handler.InteractiveCommandHandler;
 import com.sun.jdi.VirtualMachine;
 import java.io.IOException;
 
