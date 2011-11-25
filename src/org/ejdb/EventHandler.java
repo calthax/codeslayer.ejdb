@@ -43,7 +43,7 @@ public class EventHandler implements Runnable {
         this.commandHandler = commandHandler;
         this.sourceHandler = sourceHandler;
         this.stepHandler = new StepHandler(virtualMachine);
-        this.printHandler = new PrintHandler(commandHandler);
+        this.printHandler = new PrintHandler(commandHandler, new PrintFormatter());
     }
 
     public void run() {

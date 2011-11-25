@@ -17,10 +17,16 @@
  */
 package org.ejdb;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class InputCommand extends Command {
 
     private final Type type;
     private String variable;
+    private Map<Modifier, List<String>> modifiers = new HashMap<Modifier, List<String>>();
 
     public InputCommand(Type type) {
 
@@ -48,6 +54,45 @@ public class InputCommand extends Command {
         this.variable = variable;
     }
 
+    public Map<Modifier, List<String>> getModifiers() {
+
+        return modifiers;
+    }
+
+    public void addModifier(Modifier modifier, String arg) {
+        
+        List<String> values = modifiers.get(modifier);
+        if (values == null) {
+            values = new ArrayList<String>();
+            modifiers.put(modifier, values);
+        }
+
+        values.add(arg);
+    }
+
+    public enum Modifier {
+
+        FIELD("-f");
+
+        private String key;
+
+        private Modifier(String shortName) {
+
+            this.key = shortName;
+        }
+
+        public static Modifier getModifierByKey(String key) {
+
+            for (Modifier type : values()) {
+                if (type.key.equals(key)) {
+                    return type;
+                }
+            }
+
+            return null;
+        }
+    }
+
     public enum Type {
 
         NEXT("n"),
@@ -59,7 +104,7 @@ public class InputCommand extends Command {
         PRINT("p"),
         QUIT("q");
 
-        private final String key;
+        private String key;
 
         private Type(String shortName) {
 

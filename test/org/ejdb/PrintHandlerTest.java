@@ -17,6 +17,9 @@
  */
 package org.ejdb;
 
+import java.util.List;
+import java.util.Map;
+import org.ejdb.InputCommand.Modifier;
 import com.sun.jdi.Type;
 import com.sun.jdi.ArrayReference;
 import com.sun.jdi.Field;
@@ -48,7 +51,7 @@ public class PrintHandlerTest {
     public void setUp() {
 
         commandHandler = new MockCommandHandler();
-        printHandler = new PrintHandler(commandHandler);
+        printHandler = new PrintHandler(commandHandler, new MockPrintFormatter());
     }
 
     @Test
@@ -151,5 +154,14 @@ public class PrintHandlerTest {
 
         public InputCommand retrieveCommand() {throw new UnsupportedOperationException("Not supported");}
         public void run() {throw new UnsupportedOperationException("Not supported");}
+    }
+
+    private class MockPrintFormatter extends PrintFormatter {
+
+        @Override
+        public String format(Value value, Map<Modifier, List<String>> modifiers) {
+
+            return String.valueOf(value);
+        }
     }
 }

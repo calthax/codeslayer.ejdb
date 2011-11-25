@@ -17,9 +17,13 @@
  */
 package org.ejdb;
 
+import java.util.List;
+import java.util.Map;
+import org.ejdb.InputCommand.Modifier;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
 
 public class InputCommandFactoryTest {
 
@@ -56,5 +60,49 @@ public class InputCommandFactoryTest {
         InputCommandFactory inputCommandFactory = new InputCommandFactory();
         InputCommand inputCommand = inputCommandFactory.create("break org.jmesaweb.controller.BasicPresidentController:foo");
         assertNull(inputCommand);
+    }
+
+    @Test
+    public void testPrint() {
+
+        InputCommandFactory inputCommandFactory = new InputCommandFactory();
+        InputCommand inputCommand = inputCommandFactory.create("p tableModel.items -f name.firstName name.lastName");
+
+        assertEquals(inputCommand.getType(), InputCommand.Type.PRINT);
+        
+        Map<Modifier, List<String>> modifiers = inputCommand.getModifiers();
+        List<String> args = modifiers.get(InputCommand.Modifier.FIELD);
+        assertNotNull(args);
+        assertEquals(args.get(0), "name.firstName");
+        assertEquals(args.get(1), "name.lastName");
+    }
+
+    @Test
+    public void testPrintMultipleArgs() {
+
+        InputCommandFactory inputCommandFactory = new InputCommandFactory();
+        InputCommand inputCommand = inputCommandFactory.create("p tableModel.items -f name.firstName name.lastName");
+
+        assertEquals(inputCommand.getType(), InputCommand.Type.PRINT);
+
+        Map<Modifier, List<String>> modifiers = inputCommand.getModifiers();
+        List<String> args = modifiers.get(InputCommand.Modifier.FIELD);
+        assertNotNull(args);
+        assertEquals(args.get(0), "name.firstName");
+        assertEquals(args.get(1), "name.lastName");
+    }
+
+    @Test
+    public void testPrintSingleArg() {
+
+        InputCommandFactory inputCommandFactory = new InputCommandFactory();
+        InputCommand inputCommand = inputCommandFactory.create("p tableModel.items -f name.firstName");
+
+        assertEquals(inputCommand.getType(), InputCommand.Type.PRINT);
+
+        Map<Modifier, List<String>> modifiers = inputCommand.getModifiers();
+        List<String> args = modifiers.get(InputCommand.Modifier.FIELD);
+        assertNotNull(args);
+        assertEquals(args.get(0), "name.firstName");
     }
 }

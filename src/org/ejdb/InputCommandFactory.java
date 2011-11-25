@@ -17,7 +17,16 @@
  */
 package org.ejdb;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class InputCommandFactory {
+
+    private static final String PRINT_REXEX = "p\\s+([a-zA-Z._\\d]+)(.*)";
+    private static final Pattern PRINT_PATTERN = Pattern.compile(PRINT_REXEX);
+
+    private static final String PRINT_FIELDS_REXEX = ".*?-f\\s+([a-zA-Z._\\d\\s]+)";
+    private static final Pattern PRINT_FIELDS = Pattern.compile(PRINT_FIELDS_REXEX);
 
     public InputCommand create(String cmd) {
 
@@ -91,8 +100,25 @@ public class InputCommandFactory {
 
     private InputCommand getPrintCommand(String cmd, InputCommand.Type commandType) {
 
-        String variableName = cmd.substring("p ".length(), cmd.length());
+        Matcher printMatcher = PRINT_PATTERN.matcher(cmd);
+        if (!printMatcher.find()) {
+            return null;
+        }
+
         InputCommand inputCommand = new InputCommand(commandType);
+
+        String variableName = printMatcher.group(1);
+        String modifiers = printMatcher.group(2);
+
+        Matcher fieldsMatcher = PRINT_FIELDS.matcher(modifiers);
+        if (fieldsMatcher.find()) {
+            String args = fieldsMatcher.group(1);
+            String[] split = args.split("\\s");
+            for (String arg : split) {
+                inputCommand.addModifier(InputCommand.Modifier.FIELD, arg);
+            }
+        }
+
         inputCommand.setVariableName(variableName);
         return inputCommand;
     }
