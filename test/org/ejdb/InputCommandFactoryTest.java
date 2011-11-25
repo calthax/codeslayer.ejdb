@@ -63,7 +63,7 @@ public class InputCommandFactoryTest {
     }
 
     @Test
-    public void testPrint() {
+    public void testPrintField() {
 
         InputCommandFactory inputCommandFactory = new InputCommandFactory();
         InputCommand inputCommand = inputCommandFactory.create("p tableModel.items -f name.firstName name.lastName");
@@ -71,14 +71,14 @@ public class InputCommandFactoryTest {
         assertEquals(inputCommand.getType(), InputCommand.Type.PRINT);
         
         Map<Modifier, List<String>> modifiers = inputCommand.getModifiers();
-        List<String> args = modifiers.get(InputCommand.Modifier.FIELD);
-        assertNotNull(args);
-        assertEquals(args.get(0), "name.firstName");
-        assertEquals(args.get(1), "name.lastName");
+        List<String> fieldNames = modifiers.get(InputCommand.Modifier.FIELD);
+        assertNotNull(fieldNames);
+        assertEquals(fieldNames.get(0), "name.firstName");
+        assertEquals(fieldNames.get(1), "name.lastName");
     }
 
     @Test
-    public void testPrintMultipleArgs() {
+    public void testPrintFieldMultipleArgs() {
 
         InputCommandFactory inputCommandFactory = new InputCommandFactory();
         InputCommand inputCommand = inputCommandFactory.create("p tableModel.items -f name.firstName name.lastName");
@@ -86,14 +86,14 @@ public class InputCommandFactoryTest {
         assertEquals(inputCommand.getType(), InputCommand.Type.PRINT);
 
         Map<Modifier, List<String>> modifiers = inputCommand.getModifiers();
-        List<String> args = modifiers.get(InputCommand.Modifier.FIELD);
-        assertNotNull(args);
-        assertEquals(args.get(0), "name.firstName");
-        assertEquals(args.get(1), "name.lastName");
+        List<String> fieldNames = modifiers.get(InputCommand.Modifier.FIELD);
+        assertNotNull(fieldNames);
+        assertEquals(fieldNames.get(0), "name.firstName");
+        assertEquals(fieldNames.get(1), "name.lastName");
     }
 
     @Test
-    public void testPrintSingleArg() {
+    public void testPrintFieldSingleArg() {
 
         InputCommandFactory inputCommandFactory = new InputCommandFactory();
         InputCommand inputCommand = inputCommandFactory.create("p tableModel.items -f name.firstName");
@@ -101,8 +101,21 @@ public class InputCommandFactoryTest {
         assertEquals(inputCommand.getType(), InputCommand.Type.PRINT);
 
         Map<Modifier, List<String>> modifiers = inputCommand.getModifiers();
-        List<String> args = modifiers.get(InputCommand.Modifier.FIELD);
-        assertNotNull(args);
-        assertEquals(args.get(0), "name.firstName");
+        List<String> fieldNames = modifiers.get(InputCommand.Modifier.FIELD);
+        assertNotNull(fieldNames);
+        assertEquals(fieldNames.get(0), "name.firstName");
+    }
+
+    @Test
+    public void testPrintKey() {
+
+        InputCommandFactory inputCommandFactory = new InputCommandFactory();
+        InputCommand inputCommand = inputCommandFactory.create("p tableModel.items -f name.firstName -k");
+
+        assertEquals(inputCommand.getType(), InputCommand.Type.PRINT);
+
+        Map<Modifier, List<String>> modifiers = inputCommand.getModifiers();
+        List<String> keys = modifiers.get(InputCommand.Modifier.KEY);
+        assertNotNull(keys);
     }
 }

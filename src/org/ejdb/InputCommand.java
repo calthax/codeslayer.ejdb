@@ -72,6 +72,7 @@ public class InputCommand extends Command {
 
     public enum Modifier {
 
+        KEY("-k"),
         FIELD("-f");
 
         private String key;

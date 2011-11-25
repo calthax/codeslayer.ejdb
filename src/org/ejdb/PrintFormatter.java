@@ -20,6 +20,7 @@ package org.ejdb;
 import com.sun.jdi.ArrayReference;
 import com.sun.jdi.Field;
 import com.sun.jdi.ObjectReference;
+import com.sun.jdi.StringReference;
 import com.sun.jdi.Value;
 import java.util.Iterator;
 import java.util.List;
@@ -32,16 +33,18 @@ public class PrintFormatter {
             throws Exception {
 
         List<String> fieldNames = modifiers.get(Modifier.FIELD);
-        if (fieldNames != null) {
-            Class<?> klass = Class.forName(value.type().name());
-            if (List.class.isAssignableFrom(klass)) {
-                return formatList(value, fieldNames);
+        Class<?> klass = Class.forName(value.type().name());
+        if (List.class.isAssignableFrom(klass)) {
+            return formatList(value, fieldNames);
+        } else if (Map.class.isAssignableFrom(klass)) {
+            if (modifiers.get(Modifier.KEY) != null) {
+                return formatMap(value, fieldNames, true);
             } else {
-                return formatObject(value, fieldNames);
+                return formatMap(value, fieldNames, false);
             }
+        } else {
+            return formatObject(value, fieldNames);
         }
-        
-        return String.valueOf(value);
     }
 
     private String formatObject(Value value, List<String> fieldNames) 
@@ -49,19 +52,23 @@ public class PrintFormatter {
 
         StringBuilder sb = new StringBuilder();
 
-        Iterator<String> iterator = fieldNames.iterator();
-        while (iterator.hasNext()) {
-            String fieldName = iterator.next();
-            Iterator<String> variableNames = PrintUtils.getVariableNames(fieldName);
-            Value findValue = PrintUtils.findValue(value, variableNames);
-            if (findValue == null) {
-                sb.append(fieldName).append(" -> ").append("value not found");
-            } else {
-                sb.append(fieldName).append(" -> ").append(getText(findValue));
+        if (fieldNames != null) {
+            Iterator<String> iterator = fieldNames.iterator();
+            while (iterator.hasNext()) {
+                String fieldName = iterator.next();
+                Iterator<String> variableNames = PrintUtils.getVariableNames(fieldName);
+                Value findValue = PrintUtils.findValue(value, variableNames);
+                if (findValue == null) {
+                    sb.append(fieldName).append(" -> ").append("\"value not found\"");
+                } else {
+                    sb.append(fieldName).append(" -> ").append(getText(findValue));
+                }
+                if (iterator.hasNext()) {
+                    sb.append("\n");
+                }
             }
-            if (iterator.hasNext()) {
-                sb.append("\n");
-            }
+        } else {
+            sb.append(String.valueOf(value));
         }
 
         return sb.toString();
@@ -91,6 +98,50 @@ public class PrintFormatter {
                         }
                     } catch (IndexOutOfBoundsException e) {
                         // just return null
+                    }
+                }
+            }
+        }
+
+        return sb.toString();
+    }
+
+    private String formatMap(Value value, List<String> fieldNames, boolean printKeys)
+            throws Exception {
+
+        StringBuilder sb = new StringBuilder();
+
+        if (value instanceof ObjectReference) {
+            ObjectReference objectReference = (ObjectReference)value;
+
+            Field tableField = objectReference.referenceType().fieldByName("table");
+            if (tableField != null) {
+                Value tableValue = objectReference.getValue(tableField);
+                if (tableValue != null && tableValue instanceof ArrayReference) {
+                    ArrayReference tableReference = (ArrayReference)tableValue;
+                    List<Value> entryValues = tableReference.getValues();
+                    Iterator<Value> iterator = entryValues.iterator();
+                    int count = 1;
+                    while (iterator.hasNext() && count <= 10) {
+                        Value entryValue = iterator.next();
+                        if (entryValue != null && entryValue instanceof ObjectReference) {
+                            ObjectReference entryReference = (ObjectReference)entryValue;
+                            Field keyField = entryReference.referenceType().fieldByName("key");
+                            Value keyValue = entryReference.getValue(keyField);
+                            if (keyValue != null && keyValue instanceof StringReference) {
+                                if (count > 1) {
+                                    sb.append("\n\n");
+                                }
+                                if (printKeys) {
+                                    sb.append(formatObject(keyValue, fieldNames));
+                                } else {
+                                    Field valueField = entryReference.referenceType().fieldByName("value");
+                                    Value valueValue = entryReference.getValue(valueField);
+                                    sb.append(formatObject(valueValue, fieldNames));
+                                }
+                                count++;
+                            }
+                        }
                     }
                 }
             }

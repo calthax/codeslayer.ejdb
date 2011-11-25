@@ -25,8 +25,11 @@ public class InputCommandFactory {
     private static final String PRINT_REXEX = "p\\s+([a-zA-Z._\\d]+)(.*)";
     private static final Pattern PRINT_PATTERN = Pattern.compile(PRINT_REXEX);
 
-    private static final String PRINT_FIELDS_REXEX = ".*?-f\\s+([a-zA-Z._\\d\\s]+)";
-    private static final Pattern PRINT_FIELDS = Pattern.compile(PRINT_FIELDS_REXEX);
+    private static final String PRINT_FIELD_REXEX = ".*?-f\\s+([a-zA-Z._\\d\\s]+)";
+    private static final Pattern PRINT_FIELD = Pattern.compile(PRINT_FIELD_REXEX);
+
+    private static final String PRINT_KEY_REXEX = ".*?-k";
+    private static final Pattern PRINT_KEY = Pattern.compile(PRINT_KEY_REXEX);
 
     public InputCommand create(String cmd) {
 
@@ -110,15 +113,20 @@ public class InputCommandFactory {
         String variableName = printMatcher.group(1);
         String modifiers = printMatcher.group(2);
 
-        Matcher fieldsMatcher = PRINT_FIELDS.matcher(modifiers);
-        if (fieldsMatcher.find()) {
-            String args = fieldsMatcher.group(1);
+        Matcher fieldMatcher = PRINT_FIELD.matcher(modifiers);
+        if (fieldMatcher.find()) {
+            String args = fieldMatcher.group(1);
             String[] split = args.split("\\s");
             for (String arg : split) {
                 inputCommand.addModifier(InputCommand.Modifier.FIELD, arg);
             }
         }
 
+        Matcher keyMatcher = PRINT_KEY.matcher(modifiers);
+        if (keyMatcher.find()) {
+            inputCommand.addModifier(InputCommand.Modifier.KEY, "true");
+        }
+        
         inputCommand.setVariableName(variableName);
         return inputCommand;
     }
