@@ -33,9 +33,9 @@ public abstract class AbstractCommandHandler implements CommandHandler {
     private final BreakpointHandler breakpointHandler;
     private final InputCommandFactory inputCommandFactory = new InputCommandFactory();
 
-    public AbstractCommandHandler(VirtualMachine virtualMachine) {
+    public AbstractCommandHandler(VirtualMachine virtualMachine, BreakpointHandler breakpointHandler) {
 
-        breakpointHandler = new BreakpointHandler(virtualMachine, this);
+        this.breakpointHandler = breakpointHandler;
     }
 
     private void setCommand(InputCommand inputCommand) {
@@ -100,7 +100,12 @@ public abstract class AbstractCommandHandler implements CommandHandler {
                         case QUIT:
                             return;
                         case BREAK:
-                            breakpointHandler.addBreakpoint(inputCommand);
+                            try {
+                                breakpointHandler.addBreakpoint(inputCommand);
+                            } catch (InvalidBreakpointException e) {
+                                OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.INVALID_BREAKPOINT, e.getClassName(), e.getLineNumber());
+                                sendCommand(outputCommand);
+                            }
                             break;
                         case DELETE:
                             breakpointHandler.deleteBreakpoint(inputCommand);

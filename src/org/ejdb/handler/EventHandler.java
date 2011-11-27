@@ -34,6 +34,8 @@ import com.sun.jdi.event.VMDeathEvent;
 import com.sun.jdi.event.VMDisconnectEvent;
 import com.sun.jdi.event.VMStartEvent;
 import com.sun.jdi.request.StepRequest;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EventHandler implements Runnable {
 
@@ -44,12 +46,12 @@ public class EventHandler implements Runnable {
     private final StepHandler stepHandler;
     private final PrintHandler printHandler;
 
-    public EventHandler(VirtualMachine virtualMachine, CommandHandler commandHandler, SourceHandler sourceHandler) {
+    public EventHandler(VirtualMachine virtualMachine, CommandHandler commandHandler, BreakpointHandler breakpointHandler, SourceHandler sourceHandler) {
 
         this.virtualMachine = virtualMachine;
         this.commandHandler = commandHandler;
         this.sourceHandler = sourceHandler;
-        this.breakpointHandler = new BreakpointHandler(virtualMachine, commandHandler);
+        this.breakpointHandler = breakpointHandler;
         this.stepHandler = new StepHandler(virtualMachine);
         this.printHandler = new PrintHandler(commandHandler, new PrintFormatter());
     }
@@ -65,19 +67,21 @@ public class EventHandler implements Runnable {
                     if (event instanceof VMDeathEvent || event instanceof VMDisconnectEvent) {
                         return;
                     } else if (event instanceof VMStartEvent) {
-                        VMStartEvent startEvent = (VMStartEvent)event;
-                        startRequest(startEvent.thread());
+                        startRequest();
                     } else if (event instanceof ClassPrepareEvent) {
                         ClassPrepareEvent classPrepareEvent = (ClassPrepareEvent)event;
-//                        System.out.println(classPrepareEvent.referenceType().name());
-
-                        if ("org.jmesa.core.CoreContextTest".equals(classPrepareEvent.referenceType().name())) {
-                            virtualMachine.suspend();
-                            InputCommand inputCommand = new InputCommand(InputCommand.Type.BREAK, "org.jmesa.core.CoreContextTest", 53);
-                            breakpointHandler.addBreakpoint(inputCommand);
-                            virtualMachine.resume();
+                        String className = classPrepareEvent.referenceType().name();
+                        List<InputCommand> inputCommands = breakpointHandler.getUnresolvedBreakpoints(className);
+                        if (inputCommands != null) {
+                            for (InputCommand inputCommand : new ArrayList<InputCommand>(inputCommands)) {
+                                try {
+                                    breakpointHandler.addBreakpoint(inputCommand);
+                                } catch (InvalidBreakpointException e) {
+                                    OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.INVALID_BREAKPOINT, e.getClassName(), e.getLineNumber());
+                                    commandHandler.sendCommand(outputCommand);
+                                }
+                            }
                         }
-
                     } else if (event instanceof BreakpointEvent) {
                         BreakpointEvent breakpointEvent = (BreakpointEvent)event;
                         virtualMachine.suspend();
@@ -124,7 +128,7 @@ public class EventHandler implements Runnable {
         commandHandler.sendCommand(outputCommand);
     }
 
-    private void startRequest(ThreadReference threadReference)
+    private void startRequest()
             throws Exception {
 
         InputCommand inputCommand = commandHandler.retrieveCommand();

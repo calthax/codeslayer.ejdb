@@ -18,50 +18,52 @@
 package org.ejdb.handler;
 
 import org.ejdb.command.InputCommand;
-import org.ejdb.command.OutputCommand;
 import com.sun.jdi.Location;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.EventRequestManager;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class BreakpointHandler {
 
     private final VirtualMachine virtualMachine;
-    private final CommandHandler commandHandler;
     private final EventRequestManager eventRequestManager;
+    private final Map<String, List<InputCommand>> unresolvedBreakpoints = new HashMap<String, List<InputCommand>>();
 
-    public BreakpointHandler(VirtualMachine virtualMachine, CommandHandler commandHandler) {
+    public BreakpointHandler(VirtualMachine virtualMachine) {
 
         this.virtualMachine = virtualMachine;
-        this.commandHandler = commandHandler;
         this.eventRequestManager = virtualMachine.eventRequestManager();
     }
 
     public void addBreakpoint(InputCommand inputCommand)
             throws Exception {
 
-        List<ReferenceType> referenceTypes = virtualMachine.classesByName(inputCommand.getClassName());
+        String className = inputCommand.getClassName();
+        Integer lineNumber = inputCommand.getLineNumber();
+        
+        List<ReferenceType> referenceTypes = virtualMachine.classesByName(className);
         if (referenceTypes == null || referenceTypes.isEmpty()) {
-            System.err.println("Not a valid breakpoint reference type.");
+            addUnresolvedBreakpoint(inputCommand);
             return;
         }
 
         ReferenceType referenceType = referenceTypes.get(0);
-        List<Location> locations = referenceType.locationsOfLine(inputCommand.getLineNumber());
+        List<Location> locations = referenceType.locationsOfLine(lineNumber);
         if (locations == null || locations.isEmpty()) {
-            System.err.println("Not a valid breakpoint location.");
-            return;
+            throw new InvalidBreakpointException(className, lineNumber);
         }
 
         Location location = locations.get(0);
         BreakpointRequest breakpointRequest = eventRequestManager.createBreakpointRequest(location);
         breakpointRequest.setEnabled(true);
 
-        OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.ADD_BREAKPOINT, inputCommand.getClassName(), inputCommand.getLineNumber());
-        commandHandler.sendCommand(outputCommand);
+        clearUnresolvedBreakpoints(className, lineNumber);
     }
     
     public void deleteBreakpoint(InputCommand inputCommand)
@@ -69,8 +71,6 @@ public class BreakpointHandler {
 
         if (inputCommand.getClassName() == null || inputCommand.getLineNumber() == null) {
             eventRequestManager.deleteAllBreakpoints();
-            OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.DELETE_ALL_BREAKPOINTS);
-            commandHandler.sendCommand(outputCommand);
         } else {
             List<BreakpointRequest> breakpointRequests = eventRequestManager.breakpointRequests();
             Iterator iter = breakpointRequests.iterator();
@@ -84,9 +84,38 @@ public class BreakpointHandler {
 
                 if (sourcePath.startsWith(inputCommand.getClassName()) && inputCommand.getLineNumber().equals(lineNumber)) {
                     eventRequestManager.deleteEventRequest(breakpointRequest);
-                    OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.DELETE_BREAKPOINT, inputCommand.getClassName(), inputCommand.getLineNumber());
-                    commandHandler.sendCommand(outputCommand);
                     return;
+                }
+            }
+        }
+    }
+
+    public List<InputCommand> getUnresolvedBreakpoints(String className) {
+
+        return unresolvedBreakpoints.get(className);
+    }
+
+    private void addUnresolvedBreakpoint(InputCommand inputCommand) {
+
+        String className = inputCommand.getClassName();
+        List<InputCommand> inputCommands = unresolvedBreakpoints.get(className);
+        if (inputCommands == null) {
+            inputCommands = new ArrayList<InputCommand>();
+            unresolvedBreakpoints.put(className, inputCommands);
+        }
+        inputCommands.add(inputCommand);
+    }
+
+    private void clearUnresolvedBreakpoints(String className, Integer lineNumber) {
+        
+        List<InputCommand> inputCommands = unresolvedBreakpoints.get(className);
+        if (inputCommands != null) {
+            Iterator<InputCommand> iterator = inputCommands.iterator();
+            while (iterator.hasNext()) {
+                InputCommand inputCommand = iterator.next();
+                if (inputCommand.getClassName().equals(className) && 
+                        inputCommand.getLineNumber().equals(lineNumber)) {
+                    iterator.remove();
                 }
             }
         }

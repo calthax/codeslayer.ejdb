@@ -22,9 +22,9 @@ import org.ejdb.command.OutputCommand;
 
 public class ConsoleCommandHandler extends AbstractCommandHandler {
 
-    public ConsoleCommandHandler(VirtualMachine virtualMachine) {
+    public ConsoleCommandHandler(VirtualMachine virtualMachine, BreakpointHandler breakpointHandler) {
         
-        super(virtualMachine);
+        super(virtualMachine, breakpointHandler);
     }
 
     public void sendCommand(OutputCommand outputCommand) {
@@ -40,6 +40,9 @@ public class ConsoleCommandHandler extends AbstractCommandHandler {
                 System.out.printf("Hit breakpoint at %s:%d\n", outputCommand.getClassName(), outputCommand.getLineNumber());
                 System.out.printf("%d %s\n", outputCommand.getLineNumber(), outputCommand.getText());
                 break;
+            case INVALID_BREAKPOINT:
+                System.out.printf("Invalid breakpoint at %s:%d\n", outputCommand.getClassName(), outputCommand.getLineNumber());
+                break;
             case STEP_OVER_LINE:
                 System.out.printf("%d %s\n", outputCommand.getLineNumber(), outputCommand.getText());
                 break;
@@ -50,12 +53,6 @@ public class ConsoleCommandHandler extends AbstractCommandHandler {
             case STEP_OUT_LINE:
                 System.out.printf("Step to %s:%d\n", outputCommand.getClassName(), outputCommand.getLineNumber());
                 System.out.printf("%d %s\n", outputCommand.getLineNumber(), outputCommand.getText());
-                break;
-            case DELETE_ALL_BREAKPOINTS:
-                System.out.printf("Delete all breakpoints.\n");
-                break;
-            case DELETE_BREAKPOINT:
-                System.out.printf("Delete breakpoint at %s:%d\n", outputCommand.getClassName(), outputCommand.getLineNumber());
                 break;
             case PRINT_VALUE:
                 System.out.printf("%s\n", outputCommand.getText());

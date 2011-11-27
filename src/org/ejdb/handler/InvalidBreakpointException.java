@@ -15,49 +15,26 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-package org.ejdb.command;
+package org.ejdb.handler;
 
-public class OutputCommand extends Command {
+public class InvalidBreakpointException extends RuntimeException {
 
-    private final Type type;
-    private String text;
+    private final String className;
+    private final Integer lineNumber;
 
-    public OutputCommand(Type type) {
+    public InvalidBreakpointException(String className, Integer lineNumber) {
 
-        this.type = type;
+        this.className = className;
+        this.lineNumber = lineNumber;
     }
 
-    public OutputCommand(Type type, String className, Integer lineNumber) {
+    public String getClassName() {
 
-        super(className, lineNumber);
-        this.type = type;
+        return className;
     }
 
-    public Type getType() {
+    public Integer getLineNumber() {
 
-        return type;
-    }
-
-    public String getText() {
-
-        return text;
-    }
-
-    public void setText(String text) {
-
-        this.text = text;
-    }
-
-    public enum Type {
-
-        INVALID_COMMAND,
-        ADD_BREAKPOINT,
-        INVALID_BREAKPOINT,
-        HIT_BREAKPOINT,
-        STEP_OVER_LINE,
-        STEP_INTO_LINE,
-        STEP_OUT_LINE,
-        INVALID_VARIABLE,
-        PRINT_VALUE;
+        return lineNumber;
     }
 }

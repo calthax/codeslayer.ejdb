@@ -28,6 +28,7 @@ import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.request.ClassPrepareRequest;
 import org.ejdb.connector.LaunchConnector;
 import org.ejdb.connector.VirtualMachineConnector;
+import org.ejdb.handler.BreakpointHandler;
 
 public class Main {
 
@@ -44,7 +45,8 @@ public class Main {
             System.exit(1);
         }
 
-        CommandHandler commandHandler = createCommandHandler(virtualMachine);
+        BreakpointHandler breakpointHandler = new BreakpointHandler(virtualMachine);
+        CommandHandler commandHandler = createCommandHandler(virtualMachine, breakpointHandler);
         Thread commandHandlerThread = new Thread(commandHandler);
 
         List<String> sourcePaths = MainUtils.getSourcepath(modifiers);
@@ -53,7 +55,8 @@ public class Main {
             System.exit(1);
         }
 
-        EventHandler eventHandler = new EventHandler(virtualMachine, commandHandler, new SourceHandler(sourcePaths));
+        SourceHandler sourceHandler = new SourceHandler(sourcePaths);
+        EventHandler eventHandler = new EventHandler(virtualMachine, commandHandler, breakpointHandler, sourceHandler);
         Thread eventHandlerThread = new Thread(eventHandler);
 
         commandHandlerThread.start();
@@ -96,8 +99,8 @@ public class Main {
         return virtualMachineConnector.connect();
     }
 
-    private static CommandHandler createCommandHandler(VirtualMachine virtualMachine) {
+    private static CommandHandler createCommandHandler(VirtualMachine virtualMachine, BreakpointHandler breakpointHandler) {
 
-        return new ConsoleCommandHandler(virtualMachine);
+        return new ConsoleCommandHandler(virtualMachine, breakpointHandler);
     }
 }

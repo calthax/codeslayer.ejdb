@@ -22,9 +22,9 @@ import org.ejdb.command.OutputCommand;
 
 public class InteractiveCommandHandler extends AbstractCommandHandler {
 
-    public InteractiveCommandHandler(VirtualMachine virtualMachine) {
+    public InteractiveCommandHandler(VirtualMachine virtualMachine, BreakpointHandler breakpointHandler) {
         
-        super(virtualMachine);
+        super(virtualMachine, breakpointHandler);
     }
 
     public void sendCommand(OutputCommand command) {
