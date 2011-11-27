@@ -26,6 +26,7 @@ import org.ejdb.handler.ConsoleCommandHandler;
 import org.ejdb.handler.CommandHandler;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.request.ClassPrepareRequest;
+import java.util.Map;
 import org.ejdb.connector.LaunchConnector;
 import org.ejdb.connector.VirtualMachineConnector;
 import org.ejdb.handler.BreakpointHandler;
@@ -34,7 +35,7 @@ public class Main {
 
     public static void main(String args[]) {
 
-        String modifiers = MainUtils.getModifiers(args);
+        Map<Modifier, String> modifiers = ModifierUtils.getModifiers(args);
 
         VirtualMachine virtualMachine = null;
         try {
@@ -49,7 +50,7 @@ public class Main {
         CommandHandler commandHandler = createCommandHandler(virtualMachine, breakpointHandler);
         Thread commandHandlerThread = new Thread(commandHandler);
 
-        List<String> sourcePaths = MainUtils.getSourcepath(modifiers);
+        List<String> sourcePaths = ModifierUtils.getSourcepath(modifiers);
         if (sourcePaths == null) {
             System.err.println("You need to define the -sourcepath.");
             System.exit(1);
@@ -79,19 +80,19 @@ public class Main {
         System.exit(1);
     }
 
-    private static VirtualMachine createVirtualMachine(String modifiers) 
+    private static VirtualMachine createVirtualMachine(Map<Modifier, String> modifiers)
             throws Exception {
 
         VirtualMachineConnector virtualMachineConnector = null;
 
-        Integer port = MainUtils.getPort(modifiers);
+        Integer port = ModifierUtils.getPort(modifiers);
 
         if (port != null) {
             virtualMachineConnector = new SocketConnector(port);
         } else {
-            String exec = MainUtils.getLaunch(modifiers);
+            String exec = ModifierUtils.getLaunch(modifiers);
             if (exec != null) {
-                String classpath = MainUtils.getClasspath(modifiers);
+                String classpath = ModifierUtils.getClasspath(modifiers);
                 virtualMachineConnector = new LaunchConnector(exec, classpath);
             }
         }

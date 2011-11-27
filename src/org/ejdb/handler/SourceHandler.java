@@ -38,8 +38,7 @@ public class SourceHandler {
 
         File file = getFile(className);
         if (file == null) {
-            System.err.printf("Not able to get the source for class %s.\n", className);
-            return "";
+            throw new UndefinedSourceException(className);
         }
 
         try {

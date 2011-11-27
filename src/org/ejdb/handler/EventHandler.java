@@ -122,10 +122,16 @@ public class EventHandler implements Runnable {
     private void sendCommand(OutputCommand.Type type, Location location)
             throws Exception {
 
-        OutputCommand outputCommand = new OutputCommand(type, location.sourcePath(), location.lineNumber());
-        String text = sourceHandler.getLine(location.sourcePath(), location.lineNumber());
-        outputCommand.setText(text);
-        commandHandler.sendCommand(outputCommand);
+        try {
+            OutputCommand outputCommand = new OutputCommand(type, location.sourcePath(), location.lineNumber());
+            String text = sourceHandler.getLine(location.sourcePath(), location.lineNumber());
+            outputCommand.setText(text);
+            commandHandler.sendCommand(outputCommand);
+        } catch (UndefinedSourceException e) {
+            OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.UNDEFINED_SOURCE);
+            outputCommand.setText(e.getSourcePath());
+            commandHandler.sendCommand(outputCommand);
+        }
     }
 
     private void startRequest()

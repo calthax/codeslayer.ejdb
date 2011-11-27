@@ -57,6 +57,9 @@ public class ConsoleCommandHandler extends AbstractCommandHandler {
             case PRINT_VALUE:
                 System.out.printf("%s\n", outputCommand.getText());
                 break;
+            case UNDEFINED_SOURCE:
+                System.out.printf("Not able to get the source for %s.\n", outputCommand.getText());
+                break;
             case INVALID_VARIABLE:
                 System.out.printf("Invalid print request.\n");
                 break;
