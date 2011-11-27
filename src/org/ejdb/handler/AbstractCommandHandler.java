@@ -24,7 +24,6 @@ import java.util.concurrent.LinkedBlockingQueue;
 import org.ejdb.command.InputCommand;
 import org.ejdb.command.InputCommandFactory;
 import org.ejdb.command.OutputCommand;
-import org.ejdb.handler.BreakpointHandler;
 
 public abstract class AbstractCommandHandler implements CommandHandler {
 

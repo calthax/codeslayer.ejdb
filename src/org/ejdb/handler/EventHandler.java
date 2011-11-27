@@ -25,12 +25,14 @@ import com.sun.jdi.Location;
 import com.sun.jdi.ThreadReference;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.event.BreakpointEvent;
+import com.sun.jdi.event.ClassPrepareEvent;
 import com.sun.jdi.event.Event;
 import com.sun.jdi.event.EventQueue;
 import com.sun.jdi.event.EventSet;
 import com.sun.jdi.event.StepEvent;
 import com.sun.jdi.event.VMDeathEvent;
 import com.sun.jdi.event.VMDisconnectEvent;
+import com.sun.jdi.event.VMStartEvent;
 import com.sun.jdi.request.StepRequest;
 
 public class EventHandler implements Runnable {
@@ -38,6 +40,7 @@ public class EventHandler implements Runnable {
     private final VirtualMachine virtualMachine;
     private final CommandHandler commandHandler;
     private final SourceHandler sourceHandler;
+    private final BreakpointHandler breakpointHandler;
     private final StepHandler stepHandler;
     private final PrintHandler printHandler;
 
@@ -46,6 +49,7 @@ public class EventHandler implements Runnable {
         this.virtualMachine = virtualMachine;
         this.commandHandler = commandHandler;
         this.sourceHandler = sourceHandler;
+        this.breakpointHandler = new BreakpointHandler(virtualMachine, commandHandler);
         this.stepHandler = new StepHandler(virtualMachine);
         this.printHandler = new PrintHandler(commandHandler, new PrintFormatter());
     }
@@ -60,6 +64,20 @@ public class EventHandler implements Runnable {
                 for (Event event : eventSet) {
                     if (event instanceof VMDeathEvent || event instanceof VMDisconnectEvent) {
                         return;
+                    } else if (event instanceof VMStartEvent) {
+                        VMStartEvent startEvent = (VMStartEvent)event;
+                        startRequest(startEvent.thread());
+                    } else if (event instanceof ClassPrepareEvent) {
+                        ClassPrepareEvent classPrepareEvent = (ClassPrepareEvent)event;
+//                        System.out.println(classPrepareEvent.referenceType().name());
+
+                        if ("org.jmesa.core.CoreContextTest".equals(classPrepareEvent.referenceType().name())) {
+                            virtualMachine.suspend();
+                            InputCommand inputCommand = new InputCommand(InputCommand.Type.BREAK, "org.jmesa.core.CoreContextTest", 53);
+                            breakpointHandler.addBreakpoint(inputCommand);
+                            virtualMachine.resume();
+                        }
+
                     } else if (event instanceof BreakpointEvent) {
                         BreakpointEvent breakpointEvent = (BreakpointEvent)event;
                         virtualMachine.suspend();
@@ -104,6 +122,20 @@ public class EventHandler implements Runnable {
         String text = sourceHandler.getLine(location.sourcePath(), location.lineNumber());
         outputCommand.setText(text);
         commandHandler.sendCommand(outputCommand);
+    }
+
+    private void startRequest(ThreadReference threadReference)
+            throws Exception {
+
+        InputCommand inputCommand = commandHandler.retrieveCommand();
+        switch (inputCommand.getType()) {
+            case BREAK:
+                breakpointHandler.addBreakpoint(inputCommand);
+                break;
+            case CONTINUE:
+                virtualMachine.resume();
+                break;
+        }
     }
 
     private void stepRequest(ThreadReference threadReference)

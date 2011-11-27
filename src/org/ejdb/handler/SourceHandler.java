@@ -21,12 +21,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.List;
 
 public class SourceHandler {
 
-    private final String[] sourcePaths;
+    private final List<String> sourcePaths;
 
-    public SourceHandler(String[] sourcePaths) {
+    public SourceHandler(List<String> sourcePaths) {
 
         this.sourcePaths = sourcePaths;
     }

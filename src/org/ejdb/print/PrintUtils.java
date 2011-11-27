@@ -97,13 +97,15 @@ public class PrintUtils {
             return value;
         }
 
-        Class<?> klass = Class.forName(value.type().name());
+        try {
+            Class<?> klass = Class.forName(value.type().name());
 
-        if (List.class.isAssignableFrom(klass)) {
-            return getListValueType(value, args);
-        } else if (Map.class.isAssignableFrom(klass)) {
-            return getMapValueType(value, args);
-        }
+            if (List.class.isAssignableFrom(klass)) {
+                return getListValueType(value, args);
+            } else if (Map.class.isAssignableFrom(klass)) {
+                return getMapValueType(value, args);
+            }
+        } catch (ClassNotFoundException e) {}
 
         return null;
     }

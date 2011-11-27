@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
-package org.ejdb;
+package org.ejdb.connector;
 
 import com.sun.jdi.Bootstrap;
 import java.io.IOException;
@@ -26,9 +26,16 @@ import com.sun.jdi.connect.AttachingConnector;
 import com.sun.jdi.connect.Connector;
 import com.sun.jdi.connect.IllegalConnectorArgumentsException;
 
-public class VMConnector {
+public class SocketConnector implements VirtualMachineConnector {
 
-    public VirtualMachine connect(int port)
+    private final int port;
+
+    public SocketConnector(int port) {
+
+        this.port = port;
+    }
+
+    public VirtualMachine connect()
             throws IOException {
 
         String strPort = Integer.toString(port);

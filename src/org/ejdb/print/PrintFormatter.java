@@ -34,18 +34,23 @@ public class PrintFormatter {
 
         List<String> fieldNames = modifiers.get(Modifier.FIELD);
 
-        Class<?> klass = Class.forName(value.type().name());
-        if (List.class.isAssignableFrom(klass)) {
-            int lineNumbers = getLineNumbers(modifiers);
-            return formatList(value, fieldNames, lineNumbers);
-        } else if (Map.class.isAssignableFrom(klass)) {
-            int lineNumbers = getLineNumbers(modifiers);
-            if (modifiers.get(Modifier.KEY) != null) {
-                return formatMap(value, fieldNames, true, lineNumbers);
+        try {
+            Class<?> klass = Class.forName(value.type().name());
+
+            if (List.class.isAssignableFrom(klass)) {
+                int lineNumbers = getLineNumbers(modifiers);
+                return formatList(value, fieldNames, lineNumbers);
+            } else if (Map.class.isAssignableFrom(klass)) {
+                int lineNumbers = getLineNumbers(modifiers);
+                if (modifiers.get(Modifier.KEY) != null) {
+                    return formatMap(value, fieldNames, true, lineNumbers);
+                } else {
+                    return formatMap(value, fieldNames, false, lineNumbers);
+                }
             } else {
-                return formatMap(value, fieldNames, false, lineNumbers);
+                return formatObject(value, fieldNames);
             }
-        } else {
+        } catch (ClassNotFoundException e) {            
             return formatObject(value, fieldNames);
         }
     }

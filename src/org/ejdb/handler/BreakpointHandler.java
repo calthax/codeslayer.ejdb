@@ -24,7 +24,6 @@ import com.sun.jdi.ReferenceType;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.request.BreakpointRequest;
 import com.sun.jdi.request.EventRequestManager;
-import com.sun.jdi.request.StepRequest;
 import java.util.Iterator;
 import java.util.List;
 
