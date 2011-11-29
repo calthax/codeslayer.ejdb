@@ -17,22 +17,15 @@
  */
 package org.ejdb.command;
 
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.ejdb.Modifiers;
 
 public class InputCommandFactory {
 
     private static final String PRINT_REXEX = "p\\s+([a-zA-Z._\\d]+)(.*)";
     private static final Pattern PRINT_PATTERN = Pattern.compile(PRINT_REXEX);
-
-    private static final String PRINT_FIELD_REXEX = ".*?-f\\s+([a-zA-Z._\\d\\s]+)";
-    private static final Pattern PRINT_FIELD = Pattern.compile(PRINT_FIELD_REXEX);
-
-    private static final String PRINT_KEY_REXEX = ".*?-k";
-    private static final Pattern PRINT_KEY = Pattern.compile(PRINT_KEY_REXEX);
-
-    private static final String PRINT_LINE_REXEX = ".*?-n\\s+(\\d+)";
-    private static final Pattern PRINT_LINE = Pattern.compile(PRINT_LINE_REXEX);
 
     public InputCommand create(String cmd) {
 
@@ -114,28 +107,10 @@ public class InputCommandFactory {
         InputCommand inputCommand = new InputCommand(commandType);
 
         String variableName = printMatcher.group(1);
-        String modifiers = printMatcher.group(2);
-
-        Matcher fieldMatcher = PRINT_FIELD.matcher(modifiers);
-        if (fieldMatcher.find()) {
-            String args = fieldMatcher.group(1);
-            String[] split = args.split("\\s");
-            for (String arg : split) {
-                inputCommand.addModifier(InputCommand.Modifier.FIELD, arg);
-            }
-        }
-
-        Matcher lineMatcher = PRINT_LINE.matcher(modifiers);
-        if (lineMatcher.find()) {
-            String args = lineMatcher.group(1);
-            inputCommand.addModifier(InputCommand.Modifier.NUMBER, args);
-        }
-
-        Matcher keyMatcher = PRINT_KEY.matcher(modifiers);
-        if (keyMatcher.find()) {
-            inputCommand.addModifier(InputCommand.Modifier.KEY, "true");
-        }
-        
+        String text = printMatcher.group(2);
+        String[] args = text.split("\\s");
+        Modifiers modifiers = new Modifiers(args);
+        inputCommand.setModifiers(modifiers);
         inputCommand.setVariableName(variableName);
         return inputCommand;
     }

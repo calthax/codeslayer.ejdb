@@ -17,7 +17,6 @@
  */
 package org.ejdb;
 
-import java.util.Map;
 import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -29,12 +28,12 @@ public class MainUtilsTest {
                                                       "-sourcepath", "/home/jeff/workspace/jmesaWeb/src:/home/jeff/workspace/jmesa/src", 
                                                       "-launch", "org.junit.runner.JUnitCore", "org.jmesa.core.CoreContextTest"};
 
-    private final static Map<Modifier, String> modifiers = ModifierUtils.getModifiers(ARGS);
+    private final static Modifiers modifiers = new Modifiers(ARGS);
     
     @Test
     public void testGetSourcePath() {
 
-        List<String> sourcePath = ModifierUtils.getSourcepath(modifiers);
+        List<String> sourcePath = modifiers.getSourcepath();
         assertEquals(sourcePath.get(0), "/home/jeff/workspace/jmesaWeb/src");
         assertEquals(sourcePath.get(1), "/home/jeff/workspace/jmesa/src");
     }
@@ -42,21 +41,21 @@ public class MainUtilsTest {
     @Test
     public void testGetClassPath() {
 
-        String launch = ModifierUtils.getClasspath(modifiers);
+        String launch = modifiers.getClasspath();
         assertEquals(launch, "classes:lib/*");
     }
 
     @Test
     public void testGetLaunch() {
 
-        String launch = ModifierUtils.getLaunch(modifiers);
+        String launch = modifiers.getLaunch();
         assertEquals(launch, "org.junit.runner.JUnitCore org.jmesa.core.CoreContextTest");
     }
 
     @Test
     public void testGetPort() {
 
-        Integer port = ModifierUtils.getPort(modifiers);
+        Integer port = modifiers.getPort();
         assertTrue(port.intValue() == 8000);
     }
 }

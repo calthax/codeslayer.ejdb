@@ -25,11 +25,13 @@ import com.sun.jdi.ObjectReference;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.StringReference;
 import com.sun.jdi.Value;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.ejdb.command.InputCommand;
 
 public class PrintUtils {
 
@@ -37,7 +39,7 @@ public class PrintUtils {
     public final static Pattern PATTERN = Pattern.compile(REGEX);
 
     private PrintUtils() {}
-    
+
     public static Iterator<String> getVariableNames(String variableName) {
 
         List<String> fieldNames = new ArrayList<String>();

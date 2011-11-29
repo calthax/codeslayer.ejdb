@@ -18,12 +18,11 @@
 package org.ejdb.command;
 
 import java.util.List;
-import java.util.Map;
-import org.ejdb.command.InputCommand.Modifier;
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class InputCommandFactoryTest {
 
@@ -70,8 +69,7 @@ public class InputCommandFactoryTest {
 
         assertEquals(inputCommand.getType(), InputCommand.Type.PRINT);
         
-        Map<Modifier, List<String>> modifiers = inputCommand.getModifiers();
-        List<String> fieldNames = modifiers.get(InputCommand.Modifier.FIELD);
+        List<String> fieldNames = inputCommand.getModifiers().getPrintFields();
         assertNotNull(fieldNames);
         assertEquals(fieldNames.get(0), "name.firstName");
         assertEquals(fieldNames.get(1), "name.lastName");
@@ -85,8 +83,7 @@ public class InputCommandFactoryTest {
 
         assertEquals(inputCommand.getType(), InputCommand.Type.PRINT);
 
-        Map<Modifier, List<String>> modifiers = inputCommand.getModifiers();
-        List<String> fieldNames = modifiers.get(InputCommand.Modifier.FIELD);
+        List<String> fieldNames = inputCommand.getModifiers().getPrintFields();
         assertNotNull(fieldNames);
         assertEquals(fieldNames.get(0), "name.firstName");
         assertEquals(fieldNames.get(1), "name.lastName");
@@ -100,8 +97,7 @@ public class InputCommandFactoryTest {
 
         assertEquals(inputCommand.getType(), InputCommand.Type.PRINT);
 
-        Map<Modifier, List<String>> modifiers = inputCommand.getModifiers();
-        List<String> fieldNames = modifiers.get(InputCommand.Modifier.FIELD);
+        List<String> fieldNames = inputCommand.getModifiers().getPrintFields();
         assertNotNull(fieldNames);
         assertEquals(fieldNames.get(0), "name.firstName");
     }
@@ -114,22 +110,21 @@ public class InputCommandFactoryTest {
 
         assertEquals(inputCommand.getType(), InputCommand.Type.PRINT);
 
-        Map<Modifier, List<String>> modifiers = inputCommand.getModifiers();
-        List<String> keys = modifiers.get(InputCommand.Modifier.KEY);
-        assertNotNull(keys);
+        boolean key = inputCommand.getModifiers().hasPrintKey();
+        assertTrue(key);
     }
 
     @Test
-    public void testPrintLine() {
+    public void testPrintNumber() {
 
         InputCommandFactory inputCommandFactory = new InputCommandFactory();
         InputCommand inputCommand = inputCommandFactory.create("p tableModel.items -f name.firstName -k -n 5");
 
         assertEquals(inputCommand.getType(), InputCommand.Type.PRINT);
+        
+        String number = inputCommand.getModifiers().getPrintNumber();
 
-        Map<Modifier, List<String>> modifiers = inputCommand.getModifiers();
-        List<String> lines = modifiers.get(InputCommand.Modifier.NUMBER);
-        assertNotNull(lines);
-        assertEquals(lines.get(0), "5");
+        assertNotNull(number);
+        assertEquals(number, "5");
     }
 }

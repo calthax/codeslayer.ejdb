@@ -25,14 +25,14 @@ import com.sun.jdi.Value;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import org.ejdb.command.InputCommand.Modifier;
+import org.ejdb.Modifiers;
 
 public class PrintFormatter {
 
-    public String format(Value value, Map<Modifier, List<String>> modifiers) 
+    public String format(Value value, Modifiers modifiers)
             throws Exception {
 
-        List<String> fieldNames = modifiers.get(Modifier.FIELD);
+        List<String> fieldNames = modifiers.getPrintFields();
 
         try {
             Class<?> klass = Class.forName(value.type().name());
@@ -42,7 +42,7 @@ public class PrintFormatter {
                 return formatList(value, fieldNames, lineNumbers);
             } else if (Map.class.isAssignableFrom(klass)) {
                 int lineNumbers = getLineNumbers(modifiers);
-                if (modifiers.get(Modifier.KEY) != null) {
+                if (modifiers.hasPrintKey()) {
                     return formatMap(value, fieldNames, true, lineNumbers);
                 } else {
                     return formatMap(value, fieldNames, false, lineNumbers);
@@ -169,11 +169,11 @@ public class PrintFormatter {
         return "";
     }
 
-    private int getLineNumbers(Map<Modifier, List<String>> modifiers) {
-
-        List<String> numbers = modifiers.get(Modifier.NUMBER);
-        if (numbers != null) {
-            return Integer.valueOf(numbers.get(0));
+    private int getLineNumbers(Modifiers modifiers) {
+        
+        String number = modifiers.getPrintNumber();
+        if (number != null) {
+            return Integer.valueOf(number);
         }
 
         return 10;

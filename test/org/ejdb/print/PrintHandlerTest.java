@@ -17,9 +17,7 @@
  */
 package org.ejdb.print;
 
-import java.util.List;
-import java.util.Map;
-import org.ejdb.command.InputCommand.Modifier;
+import org.ejdb.Modifiers;
 import com.sun.jdi.Type;
 import com.sun.jdi.ArrayReference;
 import com.sun.jdi.Field;
@@ -162,7 +160,7 @@ public class PrintHandlerTest {
     private class MockPrintFormatter extends PrintFormatter {
 
         @Override
-        public String format(Value value, Map<Modifier, List<String>> modifiers) {
+        public String format(Value value, Modifiers modifiers) {
 
             return String.valueOf(value);
         }
