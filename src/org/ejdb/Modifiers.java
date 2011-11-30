@@ -25,34 +25,34 @@ import java.util.Map;
 
 public class Modifiers {
 
-    private Map<ModifierSwitch, String> modifiers = new HashMap<ModifierSwitch, String>();
+    private Map<Modifier, String> modifiers = new HashMap<Modifier, String>();
 
     public Modifiers(String args[]) {
 
-        ModifierSwitch lastModifierSwitch = null;
+        Modifier lastModifier = null;
 
         Iterator<String> iterator = Arrays.asList(args).iterator();
         while (iterator.hasNext()) {
             String arg = iterator.next();
 
-            ModifierSwitch modifierSwitch = ModifierSwitch.getModifierByCommand(arg);
-            if (modifierSwitch != null) {
-                lastModifierSwitch = modifierSwitch;
+            Modifier modifier = Modifier.getModifierByKey(arg);
+            if (modifier != null) {
+                lastModifier = modifier;
             }
 
-            String text = modifiers.get(lastModifierSwitch);
+            String text = modifiers.get(lastModifier);
             if (text == null) {
-                modifiers.put(lastModifierSwitch, "");
+                modifiers.put(lastModifier, "");
             } else {
                 String value = text + " " + arg;
-                modifiers.put(lastModifierSwitch, value.trim());
+                modifiers.put(lastModifier, value.trim());
             }
         }
     }
 
     public List<String> getSourcepath() {
 
-        String sourcePath = modifiers.get(ModifierSwitch.SOURCEPATH);
+        String sourcePath = modifiers.get(Modifier.SOURCEPATH);
         if (sourcePath != null) {
             String[] split = sourcePath.split(":");
             return Arrays.asList(split);
@@ -63,17 +63,17 @@ public class Modifiers {
 
     public String getClasspath() {
 
-        return modifiers.get(ModifierSwitch.CLASSPATH);
+        return modifiers.get(Modifier.CLASSPATH);
     }
 
     public String getLaunch() {
 
-        return modifiers.get(ModifierSwitch.LAUNCH);
+        return modifiers.get(Modifier.LAUNCH);
     }
 
     public Integer getPort() {
 
-        String port = modifiers.get(ModifierSwitch.PORT);
+        String port = modifiers.get(Modifier.PORT);
         if (port != null) {
             return Integer.parseInt(port.trim());
         }
@@ -83,7 +83,7 @@ public class Modifiers {
 
     public List<String> getPrintFields() {
 
-        String printFields = modifiers.get(ModifierSwitch.PRINT_FIELD);
+        String printFields = modifiers.get(Modifier.PRINT_FIELD);
         if (printFields != null) {
             String[] split = printFields.split("\\s");
             return Arrays.asList(split);
@@ -94,15 +94,15 @@ public class Modifiers {
 
     public String getPrintNumber() {
 
-        return modifiers.get(ModifierSwitch.PRINT_NUMBER);
+        return modifiers.get(Modifier.PRINT_NUMBER);
     }
 
     public boolean hasPrintKey() {
 
-        return modifiers.get(ModifierSwitch.PRINT_KEY) != null;
+        return modifiers.get(Modifier.PRINT_KEY) != null;
     }
 
-    private enum ModifierSwitch {
+    private enum Modifier {
 
         SOURCEPATH("-sourcepath"),
         CLASSPATH("-classpath"),
@@ -112,17 +112,17 @@ public class Modifiers {
         PRINT_NUMBER("-n"),
         PRINT_FIELD("-f");
 
-        private final String command;
+        private final String key;
 
-        private ModifierSwitch(String command) {
+        private Modifier(String key) {
 
-            this.command = command;
+            this.key = key;
         }
 
-        public static ModifierSwitch getModifierByCommand(String command) {
+        public static Modifier getModifierByKey(String key) {
 
-            for (ModifierSwitch value : values()) {
-                if (value.command.equals(command)) {
+            for (Modifier value : values()) {
+                if (value.key.equals(key)) {
                     return value;
                 }
             }

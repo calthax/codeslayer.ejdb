@@ -21,7 +21,7 @@ import java.util.List;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public class MainUtilsTest {
+public class ModifiersTest {
 
     private final static String ARGS[] = new String[]{"-port", "8000",
                                                       "-classpath", "classes:lib/*",
