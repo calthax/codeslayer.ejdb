@@ -17,7 +17,8 @@
  */
 package org.ejdb.command;
 
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.ejdb.Modifiers;
@@ -27,24 +28,36 @@ public class InputCommandFactory {
     private static final String PRINT_REXEX = "p\\s+([a-zA-Z._\\d]+)(.*)";
     private static final Pattern PRINT_PATTERN = Pattern.compile(PRINT_REXEX);
 
-    public InputCommand create(String cmd) {
+    public List<InputCommand> create(String commands) {
 
-        InputCommand.Type commandType = getCommandType(cmd);
+        List<InputCommand> results = new ArrayList<InputCommand>();
 
-        if (commandType == null) {
-            return null;
+        for (String command : commands.split("\n")) {
+            System.out.printf("<--cmd %s-->\n", command);
+
+            InputCommand.Type commandType = getCommandType(command);
+
+            if (commandType == null) {
+                continue;
+            }
+
+            switch (commandType) {
+                case BREAK:
+                    results.add(getBreakCommand(command, commandType));
+                    break;
+                case DELETE:
+                    results.add(getDeleteCommand(command, commandType));
+                    break;
+                case PRINT:
+                    results.add(getPrintCommand(command, commandType));
+                    break;
+                default:
+                    results.add(new InputCommand(commandType));
+                    break;
+            }
         }
 
-        switch (commandType) {
-            case BREAK:
-                return getBreakCommand(cmd, commandType);
-            case DELETE:
-                return getDeleteCommand(cmd, commandType);
-            case PRINT:
-                return getPrintCommand(cmd, commandType);
-            default:
-                return new InputCommand(commandType);
-        }
+        return results;
     }
 
     private InputCommand.Type getCommandType(String cmd) {

@@ -23,7 +23,8 @@ import static org.junit.Assert.*;
 
 public class ModifiersTest {
 
-    private final static String ARGS[] = new String[]{"-port", "8000",
+    private final static String ARGS[] = new String[]{"-interactive",
+                                                      "-port", "8000",
                                                       "-classpath", "classes:lib/*",
                                                       "-sourcepath", "/home/jeff/workspace/jmesaWeb/src:/home/jeff/workspace/jmesa/src", 
                                                       "-launch", "org.junit.runner.JUnitCore", "org.jmesa.core.CoreContextTest"};
@@ -57,5 +58,12 @@ public class ModifiersTest {
 
         Integer port = modifiers.getPort();
         assertTrue(port.intValue() == 8000);
+    }
+
+    @Test
+    public void testIsInteractive() {
+
+        boolean interactive = modifiers.isInteractive();
+        assertTrue(interactive);
     }
 }

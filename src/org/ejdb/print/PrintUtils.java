@@ -25,13 +25,11 @@ import com.sun.jdi.ObjectReference;
 import com.sun.jdi.ReferenceType;
 import com.sun.jdi.StringReference;
 import com.sun.jdi.Value;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.ejdb.command.InputCommand;
 
 public class PrintUtils {
 

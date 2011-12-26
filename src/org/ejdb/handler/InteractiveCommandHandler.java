@@ -27,7 +27,45 @@ public class InteractiveCommandHandler extends AbstractCommandHandler {
         super(virtualMachine, breakpointHandler);
     }
 
-    public void sendCommand(OutputCommand command) {
+    public void sendCommand(OutputCommand outputCommand) {
 
+        switch (outputCommand.getType()) {
+            case READY:
+                System.out.printf("%s\n", outputCommand.getText());
+                break;
+            case INVALID_COMMAND:
+                System.out.printf("Invalid command: \"%s\".\n", outputCommand.getText());
+                break;
+            case ADD_BREAKPOINT:
+                System.out.printf("Add breakpoint at %s:%d\n", outputCommand.getClassName(), outputCommand.getLineNumber());
+                break;
+            case HIT_BREAKPOINT:
+                System.out.printf("Hit breakpoint at %s:%d\n", outputCommand.getClassName(), outputCommand.getLineNumber());
+                System.out.printf("%d %s\n", outputCommand.getLineNumber(), outputCommand.getText());
+                break;
+            case INVALID_BREAKPOINT:
+                System.out.printf("Invalid breakpoint at %s:%d\n", outputCommand.getClassName(), outputCommand.getLineNumber());
+                break;
+            case STEP_OVER_LINE:
+                System.out.printf("%d %s\n", outputCommand.getLineNumber(), outputCommand.getText());
+                break;
+            case STEP_INTO_LINE:
+                System.out.printf("Step to %s:%d\n", outputCommand.getClassName(), outputCommand.getLineNumber());
+                System.out.printf("%d %s\n", outputCommand.getLineNumber(), outputCommand.getText());
+                break;
+            case STEP_OUT_LINE:
+                System.out.printf("Step to %s:%d\n", outputCommand.getClassName(), outputCommand.getLineNumber());
+                System.out.printf("%d %s\n", outputCommand.getLineNumber(), outputCommand.getText());
+                break;
+            case PRINT_VALUE:
+                System.out.printf("%s\n", outputCommand.getText());
+                break;
+            case UNDEFINED_SOURCE:
+                System.out.printf("Not able to get the source for %s.\n", outputCommand.getText());
+                break;
+            case INVALID_VARIABLE:
+                System.out.printf("Invalid print request.\n");
+                break;
+        }
     }
 }

@@ -50,6 +50,8 @@ public class OutputCommand extends Command {
 
     public enum Type {
 
+        READY,
+        DONE,
         INVALID_COMMAND,
         ADD_BREAKPOINT,
         INVALID_BREAKPOINT,

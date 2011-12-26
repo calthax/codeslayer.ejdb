@@ -26,15 +26,19 @@ import org.ejdb.handler.ConsoleCommandHandler;
 import org.ejdb.handler.CommandHandler;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.request.ClassPrepareRequest;
+import org.ejdb.command.OutputCommand;
 import org.ejdb.connector.LaunchConnector;
 import org.ejdb.connector.VirtualMachineConnector;
 import org.ejdb.handler.BreakpointHandler;
+import org.ejdb.handler.InteractiveCommandHandler;
 
 public class Main {
 
     public static void main(String args[]) {
 
         Modifiers modifiers = new Modifiers(args);
+
+        //System.out.println(modifiers.toString());
 
         VirtualMachine virtualMachine = null;
         try {
@@ -46,7 +50,7 @@ public class Main {
         }
 
         BreakpointHandler breakpointHandler = new BreakpointHandler(virtualMachine);
-        CommandHandler commandHandler = createCommandHandler(virtualMachine, breakpointHandler);
+        CommandHandler commandHandler = createCommandHandler(modifiers, virtualMachine, breakpointHandler);
         Thread commandHandlerThread = new Thread(commandHandler);
 
         List<String> sourcePaths = modifiers.getSourcepath();
@@ -64,6 +68,10 @@ public class Main {
 
         ClassPrepareRequest classPrepareRequest = virtualMachine.eventRequestManager().createClassPrepareRequest();
         classPrepareRequest.setEnabled(true);
+
+        OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.READY);
+        outputCommand.setText("ready");
+        commandHandler.sendCommand(outputCommand);
 
         do {
             // keep running while threads are still alive
@@ -99,7 +107,11 @@ public class Main {
         return virtualMachineConnector.connect();
     }
 
-    private static CommandHandler createCommandHandler(VirtualMachine virtualMachine, BreakpointHandler breakpointHandler) {
+    private static CommandHandler createCommandHandler(Modifiers modifiers, VirtualMachine virtualMachine, BreakpointHandler breakpointHandler) {
+
+        if (modifiers.isInteractive()) {
+            return new InteractiveCommandHandler(virtualMachine, breakpointHandler);
+        }
 
         return new ConsoleCommandHandler(virtualMachine, breakpointHandler);
     }

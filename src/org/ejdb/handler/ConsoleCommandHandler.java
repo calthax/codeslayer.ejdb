@@ -30,6 +30,9 @@ public class ConsoleCommandHandler extends AbstractCommandHandler {
     public void sendCommand(OutputCommand outputCommand) {
 
         switch (outputCommand.getType()) {
+            case READY:
+                System.out.printf("%s\n", outputCommand.getText());
+                break;
             case INVALID_COMMAND:
                 System.out.printf("Invalid command: \"%s\".\n", outputCommand.getText());
                 break;

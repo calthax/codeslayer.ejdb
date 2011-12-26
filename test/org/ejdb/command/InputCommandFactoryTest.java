@@ -30,7 +30,7 @@ public class InputCommandFactoryTest {
     public void testBreak() {
 
         InputCommandFactory inputCommandFactory = new InputCommandFactory();
-        InputCommand inputCommand = inputCommandFactory.create("break org.jmesaweb.controller.BasicPresidentController:63");
+        InputCommand inputCommand = inputCommandFactory.create("break org.jmesaweb.controller.BasicPresidentController:63").get(0);
         
         assertEquals(inputCommand.getType(), InputCommand.Type.BREAK);
         assertEquals(inputCommand.getClassName(), "org.jmesaweb.controller.BasicPresidentController");
@@ -41,7 +41,7 @@ public class InputCommandFactoryTest {
     public void testBreakInvalidNoTokens() {
 
         InputCommandFactory inputCommandFactory = new InputCommandFactory();
-        InputCommand inputCommand = inputCommandFactory.create("break");
+        InputCommand inputCommand = inputCommandFactory.create("break").get(0);
         assertNull(inputCommand);
     }
 
@@ -49,7 +49,7 @@ public class InputCommandFactoryTest {
     public void testBreakInvalidNumberTokens() {
 
         InputCommandFactory inputCommandFactory = new InputCommandFactory();
-        InputCommand inputCommand = inputCommandFactory.create("break foo");
+        InputCommand inputCommand = inputCommandFactory.create("break foo").get(0);
         assertNull(inputCommand);
     }
 
@@ -57,7 +57,7 @@ public class InputCommandFactoryTest {
     public void testBreakInvalidLineNumberToken() {
 
         InputCommandFactory inputCommandFactory = new InputCommandFactory();
-        InputCommand inputCommand = inputCommandFactory.create("break org.jmesaweb.controller.BasicPresidentController:foo");
+        InputCommand inputCommand = inputCommandFactory.create("break org.jmesaweb.controller.BasicPresidentController:foo").get(0);
         assertNull(inputCommand);
     }
 
@@ -65,7 +65,7 @@ public class InputCommandFactoryTest {
     public void testPrintField() {
 
         InputCommandFactory inputCommandFactory = new InputCommandFactory();
-        InputCommand inputCommand = inputCommandFactory.create("p tableModel.items -f name.firstName name.lastName");
+        InputCommand inputCommand = inputCommandFactory.create("p tableModel.items -f name.firstName name.lastName").get(0);
 
         assertEquals(inputCommand.getType(), InputCommand.Type.PRINT);
         
@@ -79,7 +79,7 @@ public class InputCommandFactoryTest {
     public void testPrintFieldMultipleArgs() {
 
         InputCommandFactory inputCommandFactory = new InputCommandFactory();
-        InputCommand inputCommand = inputCommandFactory.create("p tableModel.items -f name.firstName name.lastName");
+        InputCommand inputCommand = inputCommandFactory.create("p tableModel.items -f name.firstName name.lastName").get(0);
 
         assertEquals(inputCommand.getType(), InputCommand.Type.PRINT);
 
@@ -93,7 +93,7 @@ public class InputCommandFactoryTest {
     public void testPrintFieldSingleArg() {
 
         InputCommandFactory inputCommandFactory = new InputCommandFactory();
-        InputCommand inputCommand = inputCommandFactory.create("p tableModel.items -f name.firstName");
+        InputCommand inputCommand = inputCommandFactory.create("p tableModel.items -f name.firstName").get(0);
 
         assertEquals(inputCommand.getType(), InputCommand.Type.PRINT);
 
@@ -106,7 +106,7 @@ public class InputCommandFactoryTest {
     public void testPrintKey() {
 
         InputCommandFactory inputCommandFactory = new InputCommandFactory();
-        InputCommand inputCommand = inputCommandFactory.create("p tableModel.items -f name.firstName -k");
+        InputCommand inputCommand = inputCommandFactory.create("p tableModel.items -f name.firstName -k").get(0);
 
         assertEquals(inputCommand.getType(), InputCommand.Type.PRINT);
 
@@ -118,7 +118,7 @@ public class InputCommandFactoryTest {
     public void testPrintNumber() {
 
         InputCommandFactory inputCommandFactory = new InputCommandFactory();
-        InputCommand inputCommand = inputCommandFactory.create("p tableModel.items -f name.firstName -k -n 5");
+        InputCommand inputCommand = inputCommandFactory.create("p tableModel.items -f name.firstName -k -n 5").get(0);
 
         assertEquals(inputCommand.getType(), InputCommand.Type.PRINT);
         

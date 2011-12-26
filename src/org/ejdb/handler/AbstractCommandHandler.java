@@ -87,32 +87,32 @@ public abstract class AbstractCommandHandler implements CommandHandler {
 
                     lastCmd = cmd;
 
-                    InputCommand inputCommand = inputCommandFactory.create(cmd);
+                    for (InputCommand inputCommand : inputCommandFactory.create(cmd)) {
+                        if (inputCommand == null) {
+                            OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.INVALID_COMMAND);
+                            outputCommand.setText(cmd);
+                            sendCommand(outputCommand);
+                            continue;
+                        }
 
-                    if (inputCommand == null) {
-                        OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.INVALID_COMMAND);
-                        outputCommand.setText(cmd);
-                        sendCommand(outputCommand);
-                        continue;
-                    }
-
-                    switch (inputCommand.getType()) {
-                        case QUIT:
-                            return;
-                        case BREAK:
-                            try {
-                                breakpointHandler.addBreakpoint(inputCommand);
-                            } catch (InvalidBreakpointException e) {
-                                OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.INVALID_BREAKPOINT, e.getClassName(), e.getLineNumber());
-                                sendCommand(outputCommand);
-                            }
-                            break;
-                        case DELETE:
-                            breakpointHandler.deleteBreakpoint(inputCommand);
-                            break;
-                        default:
-                            setCommand(inputCommand);
-                            break;
+                        switch (inputCommand.getType()) {
+                            case QUIT:
+                                return;
+                            case BREAK:
+                                try {
+                                    breakpointHandler.addBreakpoint(inputCommand);
+                                } catch (InvalidBreakpointException e) {
+                                    OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.INVALID_BREAKPOINT, e.getClassName(), e.getLineNumber());
+                                    sendCommand(outputCommand);
+                                }
+                                break;
+                            case DELETE:
+                                breakpointHandler.deleteBreakpoint(inputCommand);
+                                break;
+                            default:
+                                setCommand(inputCommand);
+                                break;
+                        }
                     }
                 }
             } catch (Exception e) {

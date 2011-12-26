@@ -102,8 +102,20 @@ public class Modifiers {
         return modifiers.get(Modifier.PRINT_KEY) != null;
     }
 
+    public boolean isInteractive() {
+
+        return modifiers.get(Modifier.INTERACTIVE) != null;
+    }
+
+    @Override
+    public String toString() {
+
+        return modifiers.toString();
+    }
+
     private enum Modifier {
 
+        INTERACTIVE("-interactive"),
         SOURCEPATH("-sourcepath"),
         CLASSPATH("-classpath"),
         LAUNCH("-launch"),
