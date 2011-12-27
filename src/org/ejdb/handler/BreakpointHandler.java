@@ -47,8 +47,6 @@ public class BreakpointHandler {
         String className = inputCommand.getClassName();
         Integer lineNumber = inputCommand.getLineNumber();
 
-        System.out.printf("add breakpoint %s:%d\n", className, lineNumber);
-        
         List<ReferenceType> referenceTypes = virtualMachine.classesByName(className);
         if (referenceTypes == null || referenceTypes.isEmpty()) {
             addUnresolvedBreakpoint(inputCommand);
