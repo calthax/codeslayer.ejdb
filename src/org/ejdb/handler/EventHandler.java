@@ -36,6 +36,7 @@ import com.sun.jdi.event.VMStartEvent;
 import com.sun.jdi.request.StepRequest;
 import java.util.ArrayList;
 import java.util.List;
+import org.ejdb.command.SourceLine;
 
 public class EventHandler implements Runnable {
 
@@ -113,7 +114,6 @@ public class EventHandler implements Runnable {
                 eventSet.resume();
             } catch (Exception e) {
                 System.err.println("Not able to carry out the event.");
-                e.printStackTrace();
                 return;
             }
         }
@@ -124,8 +124,9 @@ public class EventHandler implements Runnable {
 
         try {
             OutputCommand outputCommand = new OutputCommand(type, location.sourcePath(), location.lineNumber());
-            String text = sourceHandler.getLine(location.sourcePath(), location.lineNumber());
-            outputCommand.setText(text);
+            SourceLine sourceLine = sourceHandler.getSourceLine(location.sourcePath(), location.lineNumber());
+            outputCommand.setText(sourceLine.getSourceCode());
+            outputCommand.setSourceLine(sourceLine);
             commandHandler.sendCommand(outputCommand);
         } catch (UndefinedSourceException e) {
             OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.UNDEFINED_SOURCE);

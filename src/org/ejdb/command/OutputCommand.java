@@ -21,12 +21,14 @@ public class OutputCommand extends Command {
 
     private final Type type;
     private String text;
+    private SourceLine sourceLine;
 
     public OutputCommand(Type type) {
 
         this.type = type;
     }
 
+    @Deprecated
     public OutputCommand(Type type, String className, Integer lineNumber) {
 
         super(className, lineNumber);
@@ -38,14 +40,26 @@ public class OutputCommand extends Command {
         return type;
     }
 
+    @Deprecated
     public String getText() {
 
         return text;
     }
 
+    @Deprecated
     public void setText(String text) {
 
         this.text = text;
+    }
+
+    public SourceLine getSourceLine() {
+
+        return sourceLine;
+    }
+
+    public void setSourceLine(SourceLine sourceLine) {
+
+        this.sourceLine = sourceLine;
     }
 
     public enum Type {

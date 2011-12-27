@@ -19,29 +19,29 @@ package org.ejdb.handler;
 
 import com.sun.jdi.VirtualMachine;
 import org.ejdb.command.OutputCommand;
+import org.ejdb.command.OutputFormatter;
 
 public class InteractiveCommandHandler extends AbstractCommandHandler {
 
-    public InteractiveCommandHandler(VirtualMachine virtualMachine, BreakpointHandler breakpointHandler) {
+    private final OutputFormatter outputFormatter;
+
+    public InteractiveCommandHandler(VirtualMachine virtualMachine, BreakpointHandler breakpointHandler, OutputFormatter outputFormatter) {
         
         super(virtualMachine, breakpointHandler);
+        this.outputFormatter = outputFormatter;
     }
 
     public void sendCommand(OutputCommand outputCommand) {
 
         switch (outputCommand.getType()) {
             case READY:
-                System.out.printf("%s\n", outputCommand.getText());
+                System.out.printf("<%s/>\n", outputCommand.getText());
                 break;
             case INVALID_COMMAND:
                 System.out.printf("Invalid command: \"%s\".\n", outputCommand.getText());
                 break;
-            case ADD_BREAKPOINT:
-                System.out.printf("Add breakpoint at %s:%d\n", outputCommand.getClassName(), outputCommand.getLineNumber());
-                break;
             case HIT_BREAKPOINT:
-                System.out.printf("Hit breakpoint at %s:%d\n", outputCommand.getClassName(), outputCommand.getLineNumber());
-                System.out.printf("%d %s\n", outputCommand.getLineNumber(), outputCommand.getText());
+                System.out.println(outputFormatter.formatHitBreakpoint(outputCommand));
                 break;
             case INVALID_BREAKPOINT:
                 System.out.printf("Invalid breakpoint at %s:%d\n", outputCommand.getClassName(), outputCommand.getLineNumber());

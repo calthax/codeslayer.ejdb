@@ -33,8 +33,6 @@ public class InputCommandFactory {
         List<InputCommand> results = new ArrayList<InputCommand>();
 
         for (String command : commands.split("\n")) {
-            System.out.printf("<--cmd %s-->\n", command);
-
             InputCommand.Type commandType = getCommandType(command);
 
             if (commandType == null) {

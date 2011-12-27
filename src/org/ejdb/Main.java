@@ -27,6 +27,7 @@ import org.ejdb.handler.CommandHandler;
 import com.sun.jdi.VirtualMachine;
 import com.sun.jdi.request.ClassPrepareRequest;
 import org.ejdb.command.OutputCommand;
+import org.ejdb.command.XmlOutputFormatter;
 import org.ejdb.connector.LaunchConnector;
 import org.ejdb.connector.VirtualMachineConnector;
 import org.ejdb.handler.BreakpointHandler;
@@ -38,13 +39,10 @@ public class Main {
 
         Modifiers modifiers = new Modifiers(args);
 
-        //System.out.println(modifiers.toString());
-
         VirtualMachine virtualMachine = null;
         try {
             virtualMachine = createVirtualMachine(modifiers);
         } catch (Exception e) {
-            e.printStackTrace();
             System.err.println("Not able to connect to the VM. Did you define a -port or a -launch?");
             System.exit(1);
         }
@@ -110,7 +108,7 @@ public class Main {
     private static CommandHandler createCommandHandler(Modifiers modifiers, VirtualMachine virtualMachine, BreakpointHandler breakpointHandler) {
 
         if (modifiers.isInteractive()) {
-            return new InteractiveCommandHandler(virtualMachine, breakpointHandler);
+            return new InteractiveCommandHandler(virtualMachine, breakpointHandler, new XmlOutputFormatter());
         }
 
         return new ConsoleCommandHandler(virtualMachine, breakpointHandler);

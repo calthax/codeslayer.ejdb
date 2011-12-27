@@ -117,7 +117,6 @@ public abstract class AbstractCommandHandler implements CommandHandler {
                 }
             } catch (Exception e) {
                 System.err.println("The console command handler is unable to carry out the command.");
-                e.printStackTrace();
                 return;
             }
 

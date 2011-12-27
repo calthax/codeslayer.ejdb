@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
+import org.ejdb.command.SourceLine;
 
 public class SourceHandler {
 
@@ -32,9 +33,11 @@ public class SourceHandler {
         this.sourcePaths = sourcePaths;
     }
 
-    public String getLine(String className, int lineNumber) {
+    public SourceLine getSourceLine(String className, int lineNumber) {
 
-        String result = null;
+        SourceLine sourceLine = new SourceLine();
+        sourceLine.setClassName(className);
+        sourceLine.setLineNumber(lineNumber);
 
         File file = getFile(className);
         if (file == null) {
@@ -46,13 +49,14 @@ public class SourceHandler {
             BufferedReader reader = new BufferedReader(input);
 
             int count = 1;
-            String line = reader.readLine();
-            while (line != null) {
+            String source = reader.readLine();
+            while (source != null) {
                 if (count == lineNumber) {
-                    result = line;
+                    sourceLine.setFilePath(file.getAbsolutePath());
+                    sourceLine.setSourceCode(source);
                     break;
                 }
-                line = reader.readLine();
+                source = reader.readLine();
                 count++;
             }
 
@@ -62,7 +66,7 @@ public class SourceHandler {
             System.err.printf("Not able to get the source for class %s.\n", className);
         }
 
-        return result;
+        return sourceLine;
     }
 
     private File getFile(String className) {
