@@ -21,4 +21,5 @@ public interface OutputFormatter {
 
     public String formatReady(OutputCommand outputCommand);
     public String formatHitBreakpoint(OutputCommand outputCommand);
+    public String formatStep(OutputCommand outputCommand);
 }

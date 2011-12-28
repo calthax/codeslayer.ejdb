@@ -31,12 +31,22 @@ public class XmlOutputFormatter implements OutputFormatter {
         SourceLine sourceLine = outputCommand.getSourceLine();
 
         StringBuilder xml = new StringBuilder();
-        xml.append("<hit-breakpoint>");
-        xml.append("<breakpoint");
+        xml.append("<hit-breakpoint");
         xml.append(" file_path=\"").append(sourceLine.getFilePath()).append("\"");
-        xml.append(" line_number=\"").append(outputCommand.getLineNumber()).append("\"");
+        xml.append(" line_number=\"").append(sourceLine.getLineNumber()).append("\"");
         xml.append("/>");
-        xml.append("</hit-breakpoint>");
+        return xml.toString();
+    }
+
+    public String formatStep(OutputCommand outputCommand) {
+
+        SourceLine sourceLine = outputCommand.getSourceLine();
+
+        StringBuilder xml = new StringBuilder();
+        xml.append("<step");
+        xml.append(" file_path=\"").append(sourceLine.getFilePath()).append("\"");
+        xml.append(" line_number=\"").append(sourceLine.getLineNumber()).append("\"");
+        xml.append("/>");
         return xml.toString();
     }
 }

@@ -37,9 +37,26 @@ public class XmlOutputFormatterTest {
     @Test
     public void testFormatHitBreakpoint() {
 
-        OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.HIT_BREAKPOINT, "org.jmesa.core.CoreContextTest", 60);
-        String xml = "<hit-breakpoint><breakpoint class_name=\"org.jmesa.core.CoreContextTest\" line_number=\"60\"/></hit-breakpoint>";
+        OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.HIT_BREAKPOINT);
+        SourceLine sourceLine = new SourceLine();
+        sourceLine.setFilePath("/home/jeff/jmesa/src/org/jmesa/core/CoreContextTest.java");
+        sourceLine.setLineNumber(60);
+        outputCommand.setSourceLine(sourceLine);
+        String xml = "<hit-breakpoint file_path=\"/home/jeff/jmesa/src/org/jmesa/core/CoreContextTest.java\" line_number=\"60\"/>";
         String result = formatter.formatHitBreakpoint(outputCommand);
+        assertEquals(result, xml);
+    }
+
+    @Test
+    public void testFormatStep() {
+
+        OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.STEP_INTO_LINE);
+        SourceLine sourceLine = new SourceLine();
+        sourceLine.setFilePath("/home/jeff/jmesa/src/org/jmesa/core/CoreContextTest.java");
+        sourceLine.setLineNumber(60);
+        outputCommand.setSourceLine(sourceLine);
+        String xml = "<step file_path=\"/home/jeff/jmesa/src/org/jmesa/core/CoreContextTest.java\" line_number=\"60\"/>";
+        String result = formatter.formatStep(outputCommand);
         assertEquals(result, xml);
     }
 }
