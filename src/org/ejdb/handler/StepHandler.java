@@ -78,6 +78,14 @@ public class StepHandler {
 
         StepRequest stepRequest = eventRequestManager.createStepRequest(threadReference, size, depth);
         stepRequest.putProperty(STEP_LINE, depth);
+
+        if (depth == StepRequest.STEP_INTO) {
+            stepRequest.addClassExclusionFilter("java.*");
+            stepRequest.addClassExclusionFilter("javax.*");
+            stepRequest.addClassExclusionFilter("sun.*");
+            stepRequest.addClassExclusionFilter("com.sun.*");
+        }
+        
         stepRequest.addCountFilter(1);
         stepRequest.enable();
         virtualMachine.resume();
