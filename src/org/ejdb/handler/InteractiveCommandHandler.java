@@ -20,6 +20,8 @@ package org.ejdb.handler;
 import com.sun.jdi.VirtualMachine;
 import org.ejdb.command.OutputCommand;
 import org.ejdb.command.OutputFormatter;
+import org.ejdb.print.PrintColumn;
+import org.ejdb.print.PrintRow;
 
 public class InteractiveCommandHandler extends AbstractCommandHandler {
 
@@ -56,7 +58,7 @@ public class InteractiveCommandHandler extends AbstractCommandHandler {
                 System.out.println(outputFormatter.formatStep(outputCommand));
                 break;
             case PRINT_VALUE:
-                System.out.printf("%s\n", outputCommand.getText());
+                System.out.printf("%s\n", getPrintTable(outputCommand));
                 break;
             case UNDEFINED_SOURCE:
                 System.out.printf("Not able to get the source for %s.\n", outputCommand.getText());
@@ -65,5 +67,35 @@ public class InteractiveCommandHandler extends AbstractCommandHandler {
                 System.out.printf("Invalid print request.\n");
                 break;
         }
+    }
+
+    private String getPrintTable(OutputCommand outputCommand) {
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("<print-table>");
+
+        for (PrintRow printRow : outputCommand.getPrintRows()) {
+            sb.append("<print-row>");
+            for (PrintColumn printColumn : printRow.getColumns()) {
+                sb.append("<print-column");
+                sb.append(" name=\"").append(printColumn.getName()).append("\"");
+                String value = printColumn.getValue();
+                value = value.replaceAll("\"", "&quot;");
+                value = value.replaceAll("'", "&apos;");
+                value = value.replaceAll("\"", "&quot;");
+                value = value.replaceAll("<", "&lt;");
+                value = value.replaceAll(">", "&gt;");
+                value = value.replaceAll("&", "&amp;");
+                value = value.replaceAll("\n", ""); // strip out the new line or else the buffer gets flushed automatically
+                sb.append(" value=\"").append(value).append("\"");
+                sb.append("/>");
+            }
+            sb.append("</print-row>");
+        }
+
+        sb.append("</print-table>");
+
+        return sb.toString();
     }
 }

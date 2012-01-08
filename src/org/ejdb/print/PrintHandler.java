@@ -22,6 +22,7 @@ import com.sun.jdi.StackFrame;
 import com.sun.jdi.ThreadReference;
 import com.sun.jdi.Value;
 import java.util.Iterator;
+import java.util.List;
 import java.util.regex.Matcher;
 import org.ejdb.handler.CommandHandler;
 import org.ejdb.command.InputCommand;
@@ -47,17 +48,17 @@ public class PrintHandler {
         Value value = getValueByThreadReference(threadReference, variableName);
         Value findValue = PrintUtils.findValue(value, variableNames);
 
-        String text = "";
+        List<PrintRow> printRows = null;
         if (value != null) {
-            text = printFormatter.format(findValue, inputCommand.getModifiers());
+            printRows = printFormatter.format(findValue, inputCommand.getModifiers());
         }
 
-        if (text == null) {
+        if (printRows == null) {
             OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.INVALID_VARIABLE);
             commandHandler.sendCommand(outputCommand);
         } else {
             OutputCommand outputCommand = new OutputCommand(OutputCommand.Type.PRINT_VALUE);
-            outputCommand.setText(text);
+            outputCommand.setPrintRows(printRows);
             commandHandler.sendCommand(outputCommand);
         }
     }

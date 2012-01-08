@@ -17,11 +17,15 @@
  */
 package org.ejdb.command;
 
+import java.util.List;
+import org.ejdb.print.PrintRow;
+
 public class OutputCommand extends Command {
 
     private final Type type;
     private String text;
     private SourceLine sourceLine;
+    private List<PrintRow> printRows;
 
     public OutputCommand(Type type) {
 
@@ -60,6 +64,16 @@ public class OutputCommand extends Command {
     public void setSourceLine(SourceLine sourceLine) {
 
         this.sourceLine = sourceLine;
+    }
+
+    public List<PrintRow> getPrintRows() {
+
+        return printRows;
+    }
+
+    public void setPrintRows(List<PrintRow> printRows) {
+
+        this.printRows = printRows;
     }
 
     public enum Type {

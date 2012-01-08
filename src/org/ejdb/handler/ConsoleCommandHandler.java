@@ -19,6 +19,8 @@ package org.ejdb.handler;
 
 import com.sun.jdi.VirtualMachine;
 import org.ejdb.command.OutputCommand;
+import org.ejdb.print.PrintColumn;
+import org.ejdb.print.PrintRow;
 
 public class ConsoleCommandHandler extends AbstractCommandHandler {
 
@@ -58,7 +60,13 @@ public class ConsoleCommandHandler extends AbstractCommandHandler {
                 System.out.printf("%d %s\n", outputCommand.getLineNumber(), outputCommand.getText());
                 break;
             case PRINT_VALUE:
-                System.out.printf("%s\n", outputCommand.getText());
+
+                for (PrintRow printRow : outputCommand.getPrintRows()) {
+                    for (PrintColumn printColumn : printRow.getColumns()) {
+                        System.out.printf("%s->%s\n", printColumn.getName(), printColumn.getValue());
+                    }
+                    System.out.printf("\n");
+                }
                 break;
             case UNDEFINED_SOURCE:
                 System.out.printf("Not able to get the source for %s.\n", outputCommand.getText());

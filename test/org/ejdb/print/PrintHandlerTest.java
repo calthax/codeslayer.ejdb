@@ -17,6 +17,8 @@
  */
 package org.ejdb.print;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.ejdb.Modifiers;
 import com.sun.jdi.Type;
 import com.sun.jdi.ArrayReference;
@@ -73,7 +75,8 @@ public class PrintHandlerTest {
 
         printHandler.value(threadReference, inputCommand);
 
-        assertTrue(commandHandler.command.getText().equals("foo"));
+        String text = getPrintValue(commandHandler.command);
+        assertTrue(text.equals("foo"));
     }
 
     @Test
@@ -100,7 +103,8 @@ public class PrintHandlerTest {
 
         printHandler.value(threadReference, inputCommand);
 
-        assertTrue(commandHandler.command.getText().equals("inner"));
+        String text = getPrintValue(commandHandler.command);
+        assertTrue(text.equals("inner"));
     }
 
     @Test
@@ -141,7 +145,16 @@ public class PrintHandlerTest {
         
         printHandler.value(threadReference, inputCommand);
 
-        assertTrue(commandHandler.command.getText().equals("arrayVal"));
+        String text = getPrintValue(commandHandler.command);
+        assertTrue(text.equals("arrayVal"));
+    }
+
+    private String getPrintValue(OutputCommand outputCommand) {
+
+        List<PrintRow> printRows = outputCommand.getPrintRows();
+        PrintRow printRow = printRows.get(0);
+        PrintColumn printColumn = printRow.getColumns().get(0);
+        return printColumn.getValue();
     }
 
     private class MockCommandHandler implements CommandHandler {
@@ -160,9 +173,14 @@ public class PrintHandlerTest {
     private class MockPrintFormatter extends PrintFormatter {
 
         @Override
-        public String format(Value value, Modifiers modifiers) {
+        public List<PrintRow> format(Value value, Modifiers modifiers) {
 
-            return String.valueOf(value);
+            List<PrintRow> printRows = new ArrayList<PrintRow>();
+            PrintRow printRow = new PrintRow();
+            PrintColumn printColumn = new PrintColumn("value", String.valueOf(value));
+            printRow.addColumn(printColumn);
+            printRows.add(printRow);
+            return printRows;
         }
     }
 }
