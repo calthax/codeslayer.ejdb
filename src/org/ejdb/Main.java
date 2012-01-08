@@ -37,11 +37,6 @@ public class Main {
 
     public static void main(String args[]) {
 
-//        FileOutputStream fileOutputStream = new FileOutputStream(FileDescriptor.out);
-//        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(fileOutputStream, 4096);
-//        PrintStream printStream = new PrintStream(bufferedOutputStream, false);
-//        System.setOut(printStream);
-
         Modifiers modifiers = new Modifiers(args);
 
         VirtualMachine virtualMachine = null;
